@@ -1,3 +1,5 @@
+require("./config/env");
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -7,16 +9,10 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
+const { corsOptions } = require("./config/cors");
 const logger = require("./utils/logger");
 
 const app = express();
-
-const corsOptions = {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
-};
 
 app.use(cors(corsOptions));
 
@@ -60,7 +56,7 @@ const authLimiter = rateLimit({
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "SENTINEL Drone API Documentation"
+    customSiteTitle: "DigiflAi API Documentation"
 }));
 
 app.get("/health", (req, res) => {
@@ -74,7 +70,7 @@ app.get("/health", (req, res) => {
 
 app.get("/", (req, res) => {
     res.json({
-        project: "Sentinel Drone API",
+        project: "DigiflAi API",
         version: "1.0.0"
     });
 });
@@ -105,6 +101,13 @@ app.use("/api/maintenance", maintenanceRoutes);
 
 const reportRoutes = require("./routes/report.routes");
 app.use("/api/reports", reportRoutes);
+
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: `Ruta no encontrada: ${req.method} ${req.originalUrl}`
+    });
+});
 
 const errorMiddleware = require("./middleware/error.middleware");
 app.use(errorMiddleware);
