@@ -1,253 +1,414 @@
-# DIGIFLAI — SENTINEL Drone
+# DigiflAi
 
-Monorepo: backend (API + bases de datos) + frontend (React).
+Plataforma de gestión de flotas de UAV (drones) con telemetría en tiempo real, alertas, mantenimiento predictivo y gemelo digital.
+
+Monorepo con dos aplicaciones independientes:
+
+- **`backend/`** — API REST + WebSockets + consumidor MQTT.
+- **`frontend/`** — panel de control en React.
+
+---
+
+## Tabla de contenido
+
+1. [Características](#características)
+2. [Stack tecnológico](#stack-tecnológico)
+3. [Arquitectura](#arquitectura)
+4. [Requisitos](#requisitos)
+5. [Instalación](#instalación)
+6. [Variables de entorno](#variables-de-entorno)
+7. [Bases de datos](#bases-de-datos)
+8. [Scripts disponibles](#scripts-disponibles)
+9. [API](#api)
+10. [Dependencias](#dependencias)
+11. [Solución de problemas](#solución-de-problemas)
+
+---
+
+## Características
+
+- Autenticación con JWT y control de acceso por roles.
+- Gestión de usuarios, drones, misiones, alertas y mantenimiento.
+- Telemetría en tiempo real vía MQTT → MongoDB → Socket.IO.
+- Predicción de fallos y alertas automáticas.
+- Reportes en Excel y PDF.
+- Documentación interactiva con Swagger.
+
+---
+
+## Stack tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Runtime | Node.js 20+ |
+| API | Express 4 |
+| ORM PostgreSQL | Prisma 7 |
+| BD relacional | PostgreSQL 16 |
+| ODM MongoDB | Mongoose 8 |
+| BD de telemetría | MongoDB 7 |
+| Mensajería | MQTT (EMQX 5.7) |
+| Tiempo real | Socket.IO 4 |
+| Autenticación | JSON Web Tokens + bcrypt |
+| Validación | Joi |
+| Documentación | Swagger / OpenAPI 3 |
+| Logs | Winston + Morgan |
+| Frontend | React 19 + Vite 8 |
+| Estilos | Tailwind CSS 4 |
+| Gráficas | Recharts 3 |
+| Contenedores | Docker / Podman |
+
+---
+
+## Arquitectura
 
 ```
 digiflai/
-├── backend/                  # Node + Express + Prisma + Mongoose
+├── backend/                        # API
+│   ├── prisma/
+│   │   ├── schema.prisma           # modelos PostgreSQL
+│   │   ├── migrations/             # migraciones SQL
+│   │   └── seed.js                 # roles iniciales
 │   ├── src/
-│   ├── prisma/               # schema, migraciones, seed
-│   ├── tests/
+│   │   ├── config/                 # prisma, mongo, swagger
+│   │   ├── controllers/            # capa HTTP
+│   │   ├── middleware/             # auth, roles, validación, errores
+│   │   ├── models/                 # modelo Mongoose (telemetría)
+│   │   ├── mqtt/                   # consumidor MQTT
+│   │   ├── repositories/           # acceso a datos
+│   │   ├── routes/                 # endpoints
+│   │   ├── services/               # lógica de negocio
+│   │   ├── sockets/                # Socket.IO
+│   │   ├── utils/                  # jwt, logger
+│   │   ├── validators/             # esquemas Joi
+│   │   ├── app.js                  # app Express
+│   │   └── server.js               # arranque HTTP + WS + MQTT
+│   ├── tests/                      # Jest + Supertest
 │   ├── Dockerfile
-│   ├── .env                  # configuración local (NO se sube a git)
+│   ├── jest.config.js
+│   ├── prisma.config.ts
 │   ├── .env.example
 │   └── package.json
-├── frontend/                 # React + Vite (otro equipo)
-├── docker-compose.yml        # infraestructura
-├── package.json              # scripts raíz
-└── .gitignore
+├── frontend/                       # panel React
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── public/
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── .oxlintrc.json
+│   └── package.json
+├── docker-compose.yml              # PostgreSQL + MongoDB + EMQX + API
+├── package.json                    # scripts raíz
+├── .gitignore
+└── README.md
+```
+
+**Flujo de datos**
+
+```
+Dron ──MQTT──► EMQX ──► backend ──► MongoDB (telemetría)
+                          │
+                          ├──► PostgreSQL (datos de negocio)
+                          └──► Socket.IO ──► Frontend
 ```
 
 ---
 
-## 1. Requisitos
+## Requisitos
 
-| Herramienta | Versión | Estado |
-|---|---|---|
-| Node.js | >= 20 | ✅ instalado |
-| npm | >= 10 | ✅ instalado |
-| Podman | >= 4 | ✅ instalado |
+| Herramienta | Versión mínima |
+|---|---|
+| Node.js | 20 |
+| npm | 10 |
+| Docker + Docker Compose | 24 / v2 |
+| Git | cualquiera reciente |
 
-> **No necesitas Docker.** En Fedora, Podman ya viene instalado y hace lo mismo.
-> Los comandos son casi idénticos: `docker run` → `podman run`.
-
----
-
-## 2. Servicios y puertos
-
-| Servicio | Imagen | Puerto host | Puerto contenedor |
-|---|---|---|---|
-| PostgreSQL | postgres:16 | **5433** | 5432 |
-| MongoDB | mongo:7 | 27017 | 27017 |
-| EMQX (MQTT) | emqx/emqx:5.7 | 1883 / 18083 | igual |
-| API | backend/Dockerfile | 4000 | 4000 |
-
-> ⚠️ **PostgreSQL usa el puerto 5433, no 5432.** Ya tienes un PostgreSQL local
-> escuchando en 5432; el contenedor usa 5433 para no chocar. Esto ya está
-> configurado en `backend/.env` y en `docker-compose.yml`.
+> En Fedora/RHEL puedes usar **Podman** en lugar de Docker:
+> `sudo dnf install podman podman-compose` y reemplaza `docker compose` por `podman-compose`.
 
 ---
 
-## 3. Paso a paso (primera vez)
+## Instalación
 
-### Paso 1 — Instalar dependencias del backend
+### 1. Clonar
+
+```bash
+git clone <URL_DEL_REPOSITORIO>
+cd digiflai
+```
+
+### 2. Backend
 
 ```bash
 cd backend
+cp .env.example .env        # luego edita JWT_SECRET
 npm install
 ```
 
-Esto crea `backend/node_modules/`. Sin este paso nada funciona:
-el proyecto se descargó de GitHub y no trae dependencias.
+### 3. Levantar la infraestructura
 
-### Paso 2 — Crear PostgreSQL (contenedor)
-
-```bash
-podman run -d --name sentinel-postgres \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=admin_db1 \
-  -e POSTGRES_DB=sentinel_drone \
-  -p 5433:5432 \
-  -v sentinel_pgdata:/var/lib/postgresql/data \
-  docker.io/library/postgres:16
-```
-
-La base de datos `sentinel_drone` se crea automáticamente.
-**Las tablas NO**: se crean en el Paso 4.
-
-Verificar:
+Desde la raíz del proyecto:
 
 ```bash
-podman ps
-podman logs -f sentinel-postgres     # Ctrl+C para salir
-```
-
-### Paso 3 — Crear MongoDB (contenedor)
-
-```bash
-podman run -d --name sentinel-mongo \
-  -p 27017:27017 \
-  -v sentinel_mongodata:/data/db \
-  docker.io/library/mongo:7
+docker compose up -d postgres mongodb mqtt
 ```
 
 Verificar:
 
 ```bash
-podman ps
+docker compose ps
 ```
 
-### Paso 4 — Crear las tablas (Prisma)
+### 4. Crear el esquema y los datos iniciales
 
 ```bash
 cd backend
 npx prisma generate
 npx prisma migrate deploy
-```
-
-- `generate` → crea el cliente ORM.
-- `migrate deploy` → ejecuta `prisma/migrations/*.sql` y crea
-  `Role`, `User`, `Drone`, `Mission`, `Alert`, `Maintenance`.
-
-### Paso 5 — Insertar datos iniciales
-
-```bash
 npm run seed
 ```
 
-Inserta los roles: `ADMIN`, `OPERATOR`, `TECHNICIAN`, `RESEARCHER`.
-
-> Necesarios para poder registrar el primer usuario (`register` exige `roleId`).
-
-### Paso 6 — Arrancar el backend
+### 5. Arrancar la API
 
 ```bash
 npm start
 ```
 
-> ⚠️ Usa `npm start`, **no** `npm run dev`. El script `dev` usa `nodemon`,
-> que no está instalado en las dependencias del proyecto.
-
-Debe aparecer:
-
-```
-Servidor iniciado en puerto 4000
-Entorno: development
-```
-
-### Paso 7 — Verificar
-
-- Salud: http://localhost:4000/health
-- Documentación: http://localhost:4000/api-docs
-- Prisma Studio: `npx prisma studio` → http://localhost:5555
-
----
-
-## 4. Uso diario
-
-```bash
-# ¿Están corriendo los contenedores?
-podman ps
-
-# Si están detenidos
-podman start sentinel-postgres sentinel-mongo
-
-# Detener
-podman stop sentinel-postgres sentinel-mongo
-
-# Backend
-cd backend && npm start
-```
-
-Tabla de comandos:
-
-| Acción | Comando |
+| Recurso | URL |
 |---|---|
-| Ver contenedores | `podman ps` |
-| Ver logs Postgres | `podman logs sentinel-postgres` |
-| Ver logs Mongo | `podman logs sentinel-mongo` |
-| Entrar a Postgres | `psql "postgresql://postgres:admin_db1@localhost:5433/sentinel_drone"` |
-| Entrar a Mongo | `podman exec -it sentinel-mongo mongosh` |
-| Ver datos (GUI) | `cd backend && npx prisma studio` |
-| Nueva migración | `cd backend && npx prisma migrate dev --name nombre` |
-| Aplicar migraciones | `cd backend && npx prisma migrate deploy` |
-| Reinsertar roles | `cd backend && npm run seed` |
+| API | http://localhost:4000 |
+| Salud | http://localhost:4000/health |
+| Swagger | http://localhost:4000/api-docs |
+
+### 6. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Panel: http://localhost:5173
 
 ---
 
-## 5. Alternativa: usar `docker-compose.yml`
+## Variables de entorno
 
-Ya tienes el archivo en la raíz. Requiere instalar `podman-compose`:
+El backend requiere `backend/.env` (no se versiona). Plantilla: `backend/.env.example`.
+
+| Variable | Descripción | Valor por defecto |
+|---|---|---|
+| `PORT` | Puerto de la API | `4000` |
+| `NODE_ENV` | Entorno | `development` |
+| `FRONTEND_URL` | Origen permitido por CORS/WebSocket | `http://localhost:5173` |
+| `DATABASE_URL` | Conexión PostgreSQL | `postgresql://postgres:admin_db1@localhost:5433/digiflai?schema=public` |
+| `MONGO_URL` | Conexión MongoDB | `mongodb://localhost:27017/digiflai_telemetry` |
+| `JWT_SECRET` | Clave de firma JWT | obligatoria |
+| `JWT_EXPIRES_IN` | Duración del token | `8h` |
+| `MQTT_BROKER` | Broker MQTT | `mqtt://localhost:1883` |
+| `LOG_LEVEL` | Nivel de logs | `info` |
+
+Generar una clave JWT segura:
 
 ```bash
-sudo dnf install podman-compose
-podman-compose up -d postgres mongodb mqtt
+openssl rand -hex 32
 ```
 
-Si prefieres Docker real:
+El frontend puede configurarse con `frontend/.env`:
 
-```bash
-sudo dnf install podman-compose    # o instalar docker + docker-compose
-```
+| Variable | Descripción |
+|---|---|
+| `VITE_API_URL` | URL base de la API |
+| `VITE_SOCKET_URL` | URL del servidor Socket.IO |
 
 ---
 
-## 6. ¿Dónde se guardan los datos?
+## Bases de datos
 
-No hay archivos de BD dentro del proyecto. Están en **volúmenes de Podman**:
+El proyecto usa **dos motores** con propósitos distintos:
 
-```bash
-podman volume inspect sentinel_pgdata --format '{{.Mountpoint}}'
-podman volume inspect sentinel_mongodata --format '{{.Mountpoint}}'
-```
-
-Normalmente en `~/.local/share/containers/storage/volumes/...`.
-
-Borrar todo y empezar de cero:
-
-```bash
-podman rm -f sentinel-postgres sentinel-mongo
-podman volume rm sentinel_pgdata sentinel_mongodata
-```
-
----
-
-## 7. Estructura de datos
-
-| Base | Qué guarda | Definición |
+| Motor | Datos | Definición |
 |---|---|---|
 | PostgreSQL | usuarios, roles, drones, misiones, alertas, mantenimiento | `backend/prisma/schema.prisma` |
-| MongoDB | telemetría (lat/long, batería, temperatura...) | `backend/src/models/telemetry.model.js` |
-| MQTT/EMQX | no guarda; transporta telemetría en tiempo real | — |
+| MongoDB | telemetría (lat/long, batería, temperatura, señal...) | `backend/src/models/telemetry.model.js` |
 
----
+**PostgreSQL**
 
-## 8. Problemas frecuentes
+- El contenedor publica el puerto **5433** para evitar conflictos con un PostgreSQL local. Se puede cambiar con `POSTGRES_PORT`.
+- La base `digiflai` se crea automáticamente.
+- Las tablas se crean con `npx prisma migrate deploy`.
 
-| Síntoma | Causa | Solución |
-|---|---|---|
-| `nodemon: not found` | `npm run dev` sin nodemon instalado | usar `npm start` |
-| `Can't reach database server` | Postgres no corre o puerto mal | `podman ps`, revisar puerto 5433 |
-| `MONGO_URL is undefined` / Mongo no conecta | falta `.env` o variable mal nombrada | copiar `.env.example` a `.env` |
-| `jwt must have a secret` | `JWT_SECRET` vacío | revisar `backend/.env` |
-| CORS bloqueado en el navegador | `FRONTEND_URL` no coincide con Vite | ajustar `FRONTEND_URL` (Vite = 5173) |
-| `P1001` al migrar | contenedor Postgres aún arrancando | esperar 10s y reintentar |
-| Error en `npm run seed` | `seed.js` crea `PrismaClient` sin adaptador | avisar al responsable del backend |
+**MongoDB**
 
----
+- Base `digiflai_telemetry`.
+- La colección se crea automáticamente con la primera lectura de telemetría.
 
-## 9. Variables de entorno
+**MQTT**
 
-Solo existe `backend/.env` (no se sube a git). Plantilla: `backend/.env.example`.
+- Topic de telemetría: `digiflai/telemetry/#`.
+- Panel EMQX: http://localhost:18083 (`admin` / `public`).
 
-```env
-PORT=4000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-DATABASE_URL="postgresql://postgres:admin_db1@localhost:5433/sentinel_drone?schema=public"
-MONGO_URL="mongodb://localhost:27017/sentinel_telemetry"
-JWT_SECRET=<cadena-larga-aleatoria>
-JWT_EXPIRES_IN=8h
-MQTT_BROKER=mqtt://localhost:1883
-LOG_LEVEL=info
+**Acceso rápido**
+
+```bash
+# PostgreSQL
+psql "postgresql://postgres:admin_db1@localhost:5433/digiflai"
+
+# MongoDB
+docker compose exec mongodb mongosh
+
+# GUI de PostgreSQL
+cd backend && npx prisma studio     # http://localhost:5555
 ```
+
+---
+
+## Scripts disponibles
+
+### Raíz
+
+| Comando | Acción |
+|---|---|
+| `npm run dev` | Backend en desarrollo |
+| `npm start` | Backend en producción local |
+| `npm test` | Tests del backend |
+| `npm run install:all` | Instala backend y frontend |
+| `npm run db:up` | Levanta PostgreSQL, MongoDB y EMQX |
+| `npm run db:down` | Detiene la infraestructura |
+| `npm run db:reset` | Borra volúmenes y recrea la infraestructura |
+| `npm run db:logs` | Logs de los contenedores |
+| `npm run prisma:generate` | Genera el cliente Prisma |
+| `npm run db:migrate` | Crea/aplica migraciones (dev) |
+| `npm run db:deploy` | Aplica migraciones existentes |
+| `npm run db:seed` | Inserta roles iniciales |
+| `npm run db:studio` | Abre Prisma Studio |
+| `npm run build` | Build del frontend |
+| `npm run lint` | Lint del frontend |
+
+### Backend
+
+| Comando | Acción |
+|---|---|
+| `npm start` | `node src/server.js` |
+| `npm run dev` | `nodemon src/server.js` (requiere `npm i -D nodemon`) |
+| `npm test` | `jest --coverage` |
+| `npm run test:watch` | Jest en modo watch |
+| `npm run prisma` | CLI de Prisma |
+| `npm run seed` | Ejecuta `prisma/seed.js` |
+
+### Frontend
+
+| Comando | Acción |
+|---|---|
+| `npm run dev` | Vite en desarrollo |
+| `npm run build` | Build de producción |
+| `npm run preview` | Previsualiza el build |
+| `npm run lint` | Oxlint |
+
+---
+
+## API
+
+Base: `http://localhost:4000/api`
+
+| Recurso | Endpoint |
+|---|---|
+| Autenticación | `/auth` |
+| Usuarios | `/users` |
+| Drones | `/drones` |
+| Telemetría | `/telemetry` |
+| Misiones | `/missions` |
+| Alertas | `/alerts` |
+| Mantenimiento | `/maintenance` |
+| Dashboard | `/dashboard` |
+| Reportes | `/reports` |
+
+Documentación completa: http://localhost:4000/api-docs
+
+---
+
+## Dependencias
+
+### Backend — producción
+
+| Paquete | Versión |
+|---|---|
+| `@prisma/adapter-pg` | ^7.10.0 |
+| `@prisma/client` | ^7.9.1 |
+| `bcrypt` | ^5.1.1 |
+| `compression` | ^1.7.4 |
+| `cookie-parser` | ^1.4.6 |
+| `cors` | ^2.8.5 |
+| `dotenv` | ^17.4.2 |
+| `exceljs` | ^3.4.0 |
+| `express` | ^4.19.2 |
+| `express-rate-limit` | ^7.4.1 |
+| `helmet` | ^8.0.0 |
+| `joi` | ^17.13.3 |
+| `jsonwebtoken` | ^9.0.2 |
+| `mongoose` | ^8.8.0 |
+| `morgan` | ^1.10.0 |
+| `mqtt` | ^5.10.1 |
+| `pdfkit` | ^0.20.1 |
+| `socket.io` | ^4.8.1 |
+| `swagger-jsdoc` | ^6.2.8 |
+| `swagger-ui-express` | ^5.0.1 |
+| `winston` | ^3.17.0 |
+
+### Backend — desarrollo
+
+| Paquete | Versión |
+|---|---|
+| `@types/node` | ^26.2.0 |
+| `jest` | ^29.7.0 |
+| `prisma` | ^7.9.1 |
+| `supertest` | ^7.0.0 |
+
+### Frontend — producción
+
+| Paquete | Versión |
+|---|---|
+| `@tailwindcss/postcss` | ^4.3.3 |
+| `lucide-react` | ^1.39.0 |
+| `postcss` | ^8.5.26 |
+| `react` | ^19.2.8 |
+| `react-dom` | ^19.2.8 |
+| `recharts` | ^3.10.1 |
+| `tailwindcss` | ^4.3.3 |
+
+### Frontend — desarrollo
+
+| Paquete | Versión |
+|---|---|
+| `@babel/core` | ^7.29.7 |
+| `@rolldown/plugin-babel` | ^0.2.3 |
+| `@types/react` | ^19.2.18 |
+| `@types/react-dom` | ^19.2.4 |
+| `@vitejs/plugin-react` | ^6.1.0 |
+| `babel-plugin-react-compiler` | ^1.0.0 |
+| `oxlint` | ^1.79.0 |
+| `vite` | ^8.2.2 |
+
+---
+
+## Solución de problemas
+
+| Problema | Causa | Solución |
+|---|---|---|
+| `nodemon: not found` | `nodemon` no está en `devDependencies` | usar `npm start` o `npm i -D nodemon` |
+| `P1001: Can't reach database server` | PostgreSQL no disponible | `docker compose ps` y verificar el puerto 5433 |
+| Mongo no conecta | variable mal nombrada | usar `MONGO_URL`, no `MONGODB_URI` |
+| `jwt must have a secret` | `JWT_SECRET` vacío | definirlo en `backend/.env` |
+| Error de CORS | `FRONTEND_URL` distinto al puerto del front | ajustar `FRONTEND_URL` |
+| `EADDRINUSE :5433` | otro proceso en el puerto | cambiar `POSTGRES_PORT` y `DATABASE_URL` |
+| Error al ejecutar `npm run seed` | `seed.js` instancia `PrismaClient` sin adaptador | reportar al equipo de backend |
+
+---
+
+## Licencia
+
+Por definir.

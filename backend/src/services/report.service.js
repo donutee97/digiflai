@@ -25,7 +25,7 @@ class ReportService {
 
         doc.pipe(res);
 
-        doc.fontSize(20).text("SENTINEL DRONE", {
+        doc.fontSize(20).text("DIGIFLAI", {
             align: "center"
         });
 

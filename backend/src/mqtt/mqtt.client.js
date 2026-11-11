@@ -15,7 +15,7 @@ function initialize(socketIo) {
 
         console.log("✅ MQTT conectado");
 
-        client.subscribe("sentinel/telemetry/#");
+        client.subscribe("digiflai/telemetry/#");
 
     });
 

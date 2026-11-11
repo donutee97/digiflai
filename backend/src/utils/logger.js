@@ -7,7 +7,7 @@ const logger = winston.createLogger({
         winston.format.errors({ stack: true }),
         winston.format.json()
     ),
-    defaultMeta: { service: "sentinel-drone-api" },
+    defaultMeta: { service: "digiflai-api" },
     transports: [
         new winston.transports.Console({
             format: winston.format.combine(

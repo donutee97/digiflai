@@ -60,7 +60,7 @@ const authLimiter = rateLimit({
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "SENTINEL Drone API Documentation"
+    customSiteTitle: "DigiflAi API Documentation"
 }));
 
 app.get("/health", (req, res) => {
@@ -74,7 +74,7 @@ app.get("/health", (req, res) => {
 
 app.get("/", (req, res) => {
     res.json({
-        project: "Sentinel Drone API",
+        project: "DigiflAi API",
         version: "1.0.0"
     });
 });

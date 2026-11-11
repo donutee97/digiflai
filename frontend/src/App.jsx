@@ -41,7 +41,7 @@ const C = {
 };
 
 /* ---------------------------------------------------------------
-    MOCK DATA — shaped after the SENTINEL DRONE schema  
+    MOCK DATA — shaped after the DigiflAi schema  
 ------------------------------------------------------------------*/
 
 const DRONES = [
@@ -562,7 +562,7 @@ function TabGemelo() {
     APP SHELL
 ------------------------------------------------------------------*/
 
-export default function SentinelDroneApp() {
+export default function DigiflAiApp() {
   const [tab, setTab] = useState("dashboard");
   const [clock, setClock] = useState(new Date());
 

@@ -4,12 +4,12 @@ const options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "SENTINEL Drone API",
+            title: "DigiflAi API",
             version: "1.0.0",
-            description: "API for drone fleet management - SENTINEL project",
+            description: "API for drone fleet management - DigiflAi project",
             contact: {
-                name: "SENTINEL Team",
-                email: "sentinel@example.com"
+                name: "DigiflAi Team",
+                email: "contacto@digiflai.com"
             }
         },
         servers: [

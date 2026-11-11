@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 beforeAll(async () => {
     await prisma.$connect();
-    await mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/sentinel_telemetry_test");
+    await mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/digiflai_telemetry_test");
 });
 
 afterAll(async () => {
