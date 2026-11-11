@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const { PrismaClient } = require("@prisma/client");
+require("../src/config/env");
 
-const prisma = new PrismaClient();
+const mongoose = require("mongoose");
+const prisma = require("../src/config/prisma");
 
 beforeAll(async () => {
     await prisma.$connect();

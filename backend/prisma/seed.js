@@ -1,6 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
+require("../src/config/env");
 
-const prisma = new PrismaClient();
+const prisma = require("../src/config/prisma");
 
 async function main() {
   await prisma.role.createMany({
@@ -17,5 +17,8 @@ async function main() {
 }
 
 main()
-  .catch(console.error)
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
   .finally(() => prisma.$disconnect());

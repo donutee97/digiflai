@@ -329,6 +329,22 @@ Base: `http://localhost:4000/api`
 
 Documentación completa: http://localhost:4000/api-docs
 
+### Conexión con el frontend
+
+| Punto | Valor |
+|---|---|
+| Base REST | `http://localhost:4000/api` |
+| Socket.IO | `http://localhost:4000` |
+| CORS | origen definido en `FRONTEND_URL` (acepta varios separados por coma) |
+| Login | `POST /api/auth/login` → `{ token, user }` |
+| Autorización | `Authorization: Bearer <token>` |
+| Handshake WebSocket | `io(url, { auth: { token } })` |
+| Evento de telemetría | `telemetry:update` |
+
+El backend arranca aunque PostgreSQL, MongoDB y MQTT no estén disponibles:
+`/health`, `/`, `/api-docs` y la validación de JWT funcionan sin ellos.
+Los endpoints que leen o escriben datos requieren las bases de datos activas.
+
 ---
 
 ## Dependencias
@@ -403,7 +419,7 @@ Documentación completa: http://localhost:4000/api-docs
 | `P1001: Can't reach database server` | PostgreSQL no disponible | `docker compose ps` y verificar el puerto 5433 |
 | Mongo no conecta | variable mal nombrada | usar `MONGO_URL`, no `MONGODB_URI` |
 | `jwt must have a secret` | `JWT_SECRET` vacío | definirlo en `backend/.env` |
-| Error de CORS | `FRONTEND_URL` distinto al puerto del front | ajustar `FRONTEND_URL` |
+| Error de CORS | `FRONTEND_URL` distinto al puerto del front | ajustar `FRONTEND_URL` (acepta lista separada por coma) |
 | `EADDRINUSE :5433` | otro proceso en el puerto | cambiar `POSTGRES_PORT` y `DATABASE_URL` |
 | Error al ejecutar `npm run seed` | `seed.js` instancia `PrismaClient` sin adaptador | reportar al equipo de backend |
 
