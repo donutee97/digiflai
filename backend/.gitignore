@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/.env
+prisma/migrations/migration_lock.toml
+
+# Logs
+logs/
+*.log
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Docker
+.docker/
+
+# Prisma generated client
+node_modules/.prisma/
