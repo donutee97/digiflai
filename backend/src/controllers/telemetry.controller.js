@@ -28,9 +28,11 @@ class TelemetryController {
 
         try {
 
-            const limit = req.query.limit || 100;
+            const page = Number(req.query.page) || 1;
 
-            const data = await telemetryService.findAll(limit);
+            const limit = Number(req.query.limit) || 100;
+
+            const data = await telemetryService.findAll({}, page, limit);
 
             return res.json({
 
@@ -52,10 +54,13 @@ class TelemetryController {
 
         try {
 
-            const limit = req.query.limit || 100;
+            const page = Number(req.query.page) || 1;
+
+            const limit = Number(req.query.limit) || 100;
 
             const data = await telemetryService.findByDrone(
-                req.params.droneId,
+                Number(req.params.droneId),
+                page,
                 limit
             );
 

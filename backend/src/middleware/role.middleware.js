@@ -1,6 +1,11 @@
 function roleMiddleware(...roles) {
+  // Acepta ambas formas:
+  //   role("ADMIN", "SUPERVISOR")
+  //   role(["ADMIN", "SUPERVISOR"])
+  const allowed = roles.flat();
+
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!req.user || !allowed.includes(req.user.role)) {
       return res.status(403).json({
         message: "No tiene permisos para esta acción"
       });

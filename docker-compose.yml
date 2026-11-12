@@ -70,6 +70,21 @@ services:
     volumes:
       - ./backend/logs:/app/logs
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Vite incrusta estas URLs en el bundle al compilar.
+        # Deben ser accesibles DESDE EL NAVEGADOR, no desde la red de Docker.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/api}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:-http://localhost:4000}
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      - api
+
 volumes:
   postgres_data:
   mongo_data:

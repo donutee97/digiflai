@@ -35,6 +35,23 @@ Disponible en http://localhost:5173
 | `npm run preview` | Previsualiza el build |
 | `npm run lint` | Oxlint |
 
+## Docker
+
+El frontend incluye `Dockerfile` (build con Node + servido con Nginx).
+
+```bash
+# Solo el frontend
+docker build -t digiflai-frontend .
+docker run -p 5173:80 digiflai-frontend
+
+# Desde la raíz del repo
+docker compose up -d --build --no-deps frontend
+```
+
+> Las variables `VITE_*` se **incrustan en el bundle durante el build**.
+> Para cambiarlas usa `--build-arg` o reconstruye:
+> `docker compose build --no-cache frontend`
+
 ## Estructura
 
 ```
@@ -49,6 +66,8 @@ frontend/
 ├── vite.config.js
 ├── tailwind.config.js
 ├── postcss.config.js
+├── nginx.conf
+├── Dockerfile
 └── package.json
 ```
 

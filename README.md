@@ -99,9 +99,12 @@ digiflai/
 │   ├── vite.config.js
 │   ├── tailwind.config.js
 │   ├── postcss.config.js
+│   ├── nginx.conf                  # servidor de producción
+│   ├── Dockerfile                  # build + Nginx
 │   ├── .oxlintrc.json
 │   └── package.json
-├── docker-compose.yml              # PostgreSQL + MongoDB + EMQX + API
+├── docker-compose.yml              # PostgreSQL + MongoDB + EMQX + API + Frontend
+├── .env.example                    # variables del compose
 ├── package.json                    # scripts raíz
 ├── .gitignore
 └── README.md
@@ -193,6 +196,59 @@ npm run dev
 ```
 
 Panel: http://localhost:5173
+
+---
+
+## Ejecución con Docker (todo el stack)
+
+Si prefieres no instalar Node, puedes levantar **todo** con contenedores:
+
+```bash
+cp .env.example .env        # opcional: ajusta puertos y JWT
+docker compose up -d --build
+```
+
+| Servicio | Contenedor | URL |
+|---|---|---|
+| Frontend (Nginx) | `frontend` | http://localhost:5173 |
+| API | `api` | http://localhost:4000 |
+| Swagger | `api` | http://localhost:4000/api-docs |
+| PostgreSQL | `postgres` | `localhost:5433` |
+| MongoDB | `mongodb` | `localhost:27017` |
+| EMQX | `mqtt` | `localhost:1883` (panel `18083`) |
+
+> El frontend se compila dentro de la imagen: las variables `VITE_*` se
+> **incrustan en el bundle al hacer build**. Si las cambias, hay que reconstruir:
+> `docker compose build frontend`.
+
+Si usas un PostgreSQL local (sin contenedor), levanta solo el resto:
+
+```bash
+# 1. MongoDB + EMQX
+docker compose up -d mongodb mqtt
+
+# 2. Backend con Postgres local
+cd backend && npm start
+
+# 3. Frontend (en otra terminal)
+cd frontend && npm run dev
+```
+
+O el frontend servido por Nginx (sin depender del contenedor `api`):
+
+```bash
+docker compose up -d --build --no-deps frontend
+```
+
+> `--no-deps` evita que se levanten `api` y `postgres`. El bundle del front
+> apunta a `http://localhost:4000`, donde corre tu backend local.
+
+Para detener todo:
+
+```bash
+docker compose down          # conserva datos
+docker compose down -v       # borra volúmenes (¡borra las BD!)
+```
 
 ---
 

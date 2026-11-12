@@ -29,7 +29,12 @@ class UserService {
         const limit = Number(query.limit) || 10;
         const search = query.search || "";
 
-        return await userRepository.findAll(page, limit, search);
+        const result = await userRepository.findAll(page, limit, search);
+
+        // Nunca exponer el hash de la contraseña al cliente.
+        result.users = result.users.map(({ password, ...user }) => user);
+
+        return result;
     }
 
     async findById(id) {
