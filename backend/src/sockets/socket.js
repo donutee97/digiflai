@@ -1,12 +1,13 @@
 let io;
 const jwt = require("jsonwebtoken");
+const { getAllowedOrigins } = require("../config/cors");
 
 function initialize(server){
 
     io=require("socket.io")(server,{
 
         cors:{
-            origin: process.env.FRONTEND_URL || "http://localhost:3000",
+            origin: getAllowedOrigins(),
             credentials: true
         }
 

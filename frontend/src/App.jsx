@@ -245,7 +245,7 @@ function TabGemelo() {
     APP SHELL
 ------------------------------------------------------------------*/
 
-export default function SentinelDroneApp() {
+export default function DigiflAiApp() {
   const [tab, setTab] = useState("dashboard");
   const [clock, setClock] = useState(new Date());
 

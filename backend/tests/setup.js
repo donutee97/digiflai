@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-const { PrismaClient } = require("@prisma/client");
+require("../src/config/env");
 
-const prisma = new PrismaClient();
+const mongoose = require("mongoose");
+const prisma = require("../src/config/prisma");
 
 beforeAll(async () => {
     await prisma.$connect();
-    await mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/sentinel_telemetry_test");
+    await mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/digiflai_telemetry_test");
 });
 
 afterAll(async () => {
