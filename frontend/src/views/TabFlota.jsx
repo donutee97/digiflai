@@ -1,8 +1,8 @@
 import { Plane } from "lucide-react";
 import { C, stateStyle } from "../theme";
 import { DRONES } from "../data/mock";
-import Badge from "../components/ui/Badge";
-import Panel from "../components/ui/Panel";
+import Badge from "../components/ui/badge";
+import Panel from "../components/ui/panel";
 
 function TabFlota() {
   return (

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { C, stateStyle, nivelStyle } from "./theme";
 import { DRONES, ALERTS, MISSIONS, MAINTENANCE, PREDICTIONS, TELEMETRY } from "./data/mock";
-import Badge from "./components/ui/Badge";
-import Panel from "./components/ui/Panel";
+import Badge from "./components/ui/badge";
+import Panel from "./components/ui/panel";
 import KPI from "./components/ui/KPI";
 import FleetRadar from "./components/charts/FleetRadar";
 import TabDashboard from "./views/TabDashboard";
