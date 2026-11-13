@@ -67,7 +67,8 @@ digiflai/
 │   ├── prisma/
 │   │   ├── schema.prisma           # modelos PostgreSQL
 │   │   ├── migrations/             # migraciones SQL
-│   │   └── seed.js                 # roles iniciales
+│   │   ├── seed.js                 # roles iniciales
+│   │   └── seed-demo.js            # datos de demostración
 │   ├── src/
 │   │   ├── config/                 # prisma, mongo, swagger
 │   │   ├── controllers/            # capa HTTP
@@ -90,7 +91,12 @@ digiflai/
 │   └── package.json
 ├── frontend/                       # panel React
 │   ├── src/
+│   │   ├── api/                    # cliente HTTP y mapeadores
 │   │   ├── assets/
+│   │   ├── components/             # ui, charts, layout
+│   │   ├── data/mock.js            # datos de ejemplo (pestañas sin API aún)
+│   │   ├── hooks/                  # useApiData
+│   │   ├── views/                  # pestañas del panel
 │   │   ├── App.jsx
 │   │   ├── main.jsx
 │   │   └── index.css
@@ -173,7 +179,13 @@ cd backend
 npx prisma generate
 npx prisma migrate deploy
 npm run seed
+npm run seed:demo   # opcional: datos de ejemplo para ver el frontend con información
 ```
+
+`seed` crea los roles del sistema; `seed:demo` carga el conjunto de datos de
+demostración (5 usuarios, 6 drones, misiones, alertas, mantenimientos,
+predicciones y telemetría en MongoDB). Todos los usuarios demo usan la
+contraseña `digiflai123`; el administrador es `admin@digiflai.com`.
 
 ### 5. Arrancar la API
 
@@ -280,6 +292,8 @@ El frontend puede configurarse con `frontend/.env`:
 |---|---|
 | `VITE_API_URL` | URL base de la API |
 | `VITE_SOCKET_URL` | URL del servidor Socket.IO |
+| `VITE_DEMO_EMAIL` | Usuario del login automático temporal (por defecto `admin@digiflai.com`) |
+| `VITE_DEMO_PASSWORD` | Contraseña del login automático temporal (por defecto `digiflai123`) |
 
 ---
 
@@ -355,6 +369,7 @@ cd backend && npx prisma studio     # http://localhost:5555
 | `npm run test:watch` | Jest en modo watch |
 | `npm run prisma` | CLI de Prisma |
 | `npm run seed` | Ejecuta `prisma/seed.js` |
+| `npm run seed:demo` | Carga datos de demostración (usuarios, drones, misiones, alertas, mantenimientos, predicciones y telemetría) |
 
 ### Frontend
 
@@ -381,6 +396,7 @@ Base: `http://localhost:4000/api`
 | Alertas | `/alerts` |
 | Mantenimiento | `/maintenance` |
 | Dashboard | `/dashboard` |
+| Predicciones | `/predictions` |
 | Reportes | `/reports` |
 
 Documentación completa: http://localhost:4000/api-docs
@@ -396,6 +412,18 @@ Documentación completa: http://localhost:4000/api-docs
 | Autorización | `Authorization: Bearer <token>` |
 | Handshake WebSocket | `io(url, { auth: { token } })` |
 | Evento de telemetría | `telemetry:update` |
+
+El frontend incluye un cliente HTTP en `frontend/src/api/client.js`. Mientras
+no exista pantalla de login, ese cliente inicia sesión automáticamente con el
+usuario demo (`admin@digiflai.com` / `digiflai123`, configurables con
+`VITE_DEMO_EMAIL` y `VITE_DEMO_PASSWORD`) y guarda el JWT en `localStorage`.
+Es un comportamiento temporal: al implementar el login real basta con llamar
+a `login(email, password)` desde el formulario.
+
+Las vistas de `Panel general` y `Flota UAV` ya consultan la API
+(`/dashboard`, `/drones`, `/alerts`, `/missions`, `/predictions`,
+`/telemetry/drone/:id`). El resto de pestañas sigue usando datos de ejemplo
+en `frontend/src/data/mock.js`.
 
 El backend arranca aunque PostgreSQL, MongoDB y MQTT no estén disponibles:
 `/health`, `/`, `/api-docs` y la validación de JWT funcionan sin ellos.

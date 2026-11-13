@@ -23,8 +23,27 @@ Disponible en http://localhost:5173
 |---|---|---|
 | `VITE_API_URL` | URL base de la API | `http://localhost:4000/api` |
 | `VITE_SOCKET_URL` | Servidor Socket.IO | `http://localhost:4000` |
+| `VITE_DEMO_EMAIL` | Usuario del login automático temporal | `admin@digiflai.com` |
+| `VITE_DEMO_PASSWORD` | Contraseña del login automático temporal | `digiflai123` |
 
 > Solo las variables con prefijo `VITE_` se exponen al navegador.
+
+## Consumo de la API
+
+Las vistas `Panel general` (`src/views/TabDashboard.jsx`) y `Flota UAV`
+(`src/views/TabFlota.jsx`) leen datos reales del backend:
+
+- `src/api/client.js` centraliza las peticiones y añade el JWT.
+- `src/api/mappers.js` traduce los enums de PostgreSQL al formato visual.
+- `src/hooks/useApiData.js` maneja carga, error y cancelación al desmontar.
+
+Mientras no exista pantalla de login, `client.js` inicia sesión
+automáticamente con `VITE_DEMO_EMAIL` / `VITE_DEMO_PASSWORD` y guarda el
+token en `localStorage`. Es temporal: al crear el formulario de login, llama
+a `login(email, password)` y elimina la llamada automática.
+
+El resto de pestañas (telemetría, misiones, alertas, mantenimiento, IA,
+gemelo digital) todavía usan `src/data/mock.js`.
 
 ## Scripts
 
@@ -58,7 +77,12 @@ docker compose up -d --build --no-deps frontend
 frontend/
 ├── public/
 ├── src/
+│   ├── api/                        # cliente HTTP y mapeadores
 │   ├── assets/
+│   ├── components/                 # ui, charts, layout
+│   ├── data/mock.js                # datos de ejemplo (pestañas sin API)
+│   ├── hooks/                      # useApiData
+│   ├── views/                      # pestañas del panel
 │   ├── App.jsx
 │   ├── main.jsx
 │   └── index.css

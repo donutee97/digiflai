@@ -50,6 +50,10 @@ const telemetrySchema = new mongoose.Schema({
         type: Number
     },
 
+    vibration: {
+        type: Number
+    },
+
     status: {
         type: String,
         default: "ONLINE"

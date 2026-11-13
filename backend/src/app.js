@@ -96,6 +96,9 @@ app.use("/api/alerts", alertRoutes);
 const dashboardRoutes = require("./routes/dashboard.routes");
 app.use("/api/dashboard", dashboardRoutes);
 
+const predictionRoutes = require("./routes/prediction.routes");
+app.use("/api/predictions", predictionRoutes);
+
 const maintenanceRoutes = require("./routes/maintenance.routes");
 app.use("/api/maintenance", maintenanceRoutes);
 
