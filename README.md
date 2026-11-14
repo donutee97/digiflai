@@ -268,6 +268,33 @@ docker compose down          # conserva datos
 docker compose down -v       # borra volúmenes (¡borra las BD!)
 ```
 
+### Reiniciar el entorno completo (backend local + Docker)
+
+El proyecto incluye un script que detiene y vuelve a levantar el backend
+local, MongoDB, MQTT y el frontend en el orden correcto. No toca el
+PostgreSQL local ni arranca los contenedores `api` / `postgres`:
+
+```bash
+./scripts/digiflai.sh restart
+```
+
+| Comando | Acción |
+|---|---|
+| `./scripts/digiflai.sh status` | Muestra el estado de API, contenedores y frontend |
+| `./scripts/digiflai.sh stop` | Detiene el backend y todos los contenedores del proyecto |
+| `./scripts/digiflai.sh start` | Levanta MongoDB, MQTT, frontend y backend local |
+| `./scripts/digiflai.sh restart` | Hace `stop` y luego `start` |
+| `./scripts/digiflai.sh logs` | Sigue el log del backend en vivo |
+
+El script guarda el PID y el log del backend en `.run/` (ignorado por Git).
+
+> El PostgreSQL local es un servicio del sistema. Si también quieres
+> reiniciarlo, hazlo aparte:
+>
+> ```bash
+> sudo systemctl restart postgresql
+> ```
+
 ---
 
 ## Variables de entorno
@@ -366,6 +393,7 @@ cd backend && npx prisma studio     # http://localhost:5555
 | `npm run db:studio` | Abre Prisma Studio |
 | `npm run build` | Build del frontend |
 | `npm run lint` | Lint del frontend |
+| `./scripts/digiflai.sh restart` | Reinicia backend local + MongoDB + MQTT + frontend |
 
 ### Backend
 

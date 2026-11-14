@@ -263,6 +263,31 @@ Abra la URL que muestre Vite (normalmente **http://localhost:5173**).
 En ambas opciones el navegador habla con `http://localhost:4000/api`, que es
 el backend local.
 
+### Atajo: arrancar o reiniciar todo con un solo comando
+
+El repositorio incluye `scripts/digiflai.sh`, que hace exactamente lo de los
+pasos 5, 7 y 8 en el orden correcto (MongoDB/MQTT, frontend y backend local),
+sin arrancar los contenedores `api` ni `postgres`:
+
+```bash
+./scripts/digiflai.sh restart
+```
+
+| Comando | Acción |
+|---|---|
+| `./scripts/digiflai.sh status` | Estado de API, contenedores y frontend |
+| `./scripts/digiflai.sh stop` | Detiene backend y contenedores del proyecto |
+| `./scripts/digiflai.sh start` | Levanta todo en orden |
+| `./scripts/digiflai.sh restart` | `stop` + `start` |
+| `./scripts/digiflai.sh logs` | Sigue el log del backend |
+
+> La primera vez, si el frontend aún no tiene imagen, el script la construye.
+> Después de cambiar código del frontend, hay que reconstruirla:
+>
+> ```bash
+> docker compose up -d --no-deps --build frontend
+> ```
+
 ---
 
 ## 9. Verificar que quedó idéntico
@@ -365,29 +390,3 @@ demostración.
 | `nodemon: not found` | Se usó `npm run dev` | Usar `npm start` |
 | `Cannot find module '@prisma/client'` | Falta generar el cliente | `npx prisma generate` |
 | Se levantó todo con Docker y la API usa una base vacía | Se ejecutó `docker compose up -d` | `docker compose stop api postgres` y usar el backend local |
-
----
-
-## 12. Antes de subir a GitHub
-
-El archivo `.env` **no** se sube: el `.gitignore` ya lo excluye. Solo se
-versionan los `.env.example`.
-
-Verificar:
-
-```bash
-git status
-```
-
-No debe aparecer `backend/.env` ni `frontend/.env`. Sí deben aparecer los
-cambios de código y la carpeta `docs/`.
-
-Para publicar:
-
-```bash
-git add .
-git commit -m "Operaciones: flujos A y C, reinicio de demo y guía de instalación"
-git push origin main
-```
-
-El compañero debe clonar **después** de ese `push`.

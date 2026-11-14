@@ -48,3 +48,6 @@ Thumbs.db
 
 # Local files
 *.local
+
+# Run files (PID y logs del backend local)
+.run/
