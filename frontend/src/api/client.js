@@ -81,6 +81,30 @@ export const api = {
 
     getMissions: () => request("/missions"),
 
+    createMission: (payload) =>
+        request("/missions", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        }),
+
+    finishMission: (id) =>
+        request(`/missions/${id}/finish`, { method: "PUT" }),
+
+    getMaintenances: (limit = 20) => request(`/maintenance?limit=${limit}`),
+
+    createMaintenance: (payload) =>
+        request("/maintenance", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        }),
+
+    finishMaintenance: (id) =>
+        request(`/maintenance/${id}/finish`, { method: "PUT" }),
+
+    getUsers: (limit = 50) => request(`/users?limit=${limit}`),
+
+    resetDemo: () => request("/demo/reset", { method: "POST" }),
+
     getPredictions: () => request("/predictions"),
 
     getTelemetryByDrone: (droneId, limit = 100) =>

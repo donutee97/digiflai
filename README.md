@@ -172,6 +172,12 @@ Verificar:
 docker compose ps
 ```
 
+> Si ya tienes **PostgreSQL local** (por ejemplo, administrado con DBeaver) y
+> no quieres usar el contenedor `postgres`, sigue la guía
+> **[Replicar DigiflAi en otro computador](docs/SETUP_COMPANERO.md)**: usa el
+> puerto 5432, no arranca el contenedor `api` y deja el mismo entorno que el
+> equipo de desarrollo.
+
 ### 4. Crear el esquema y los datos iniciales
 
 ```bash
@@ -279,6 +285,8 @@ El backend requiere `backend/.env` (no se versiona). Plantilla: `backend/.env.ex
 | `JWT_EXPIRES_IN` | Duración del token | `8h` |
 | `MQTT_BROKER` | Broker MQTT | `mqtt://localhost:1883` |
 | `LOG_LEVEL` | Nivel de logs | `info` |
+| `RATE_LIMIT_MAX` | Peticiones por IP a `/api/` cada 15 min | `100` |
+| `AUTH_RATE_LIMIT_MAX` | Intentos de login por IP cada 15 min | `10` |
 
 Generar una clave JWT segura:
 
@@ -398,6 +406,7 @@ Base: `http://localhost:4000/api`
 | Dashboard | `/dashboard` |
 | Predicciones | `/predictions` |
 | Reportes | `/reports` |
+| Demo (reinicio) | `/demo` |
 
 Documentación completa: http://localhost:4000/api-docs
 
@@ -422,8 +431,17 @@ a `login(email, password)` desde el formulario.
 
 Las vistas de `Panel general` y `Flota UAV` ya consultan la API
 (`/dashboard`, `/drones`, `/alerts`, `/missions`, `/predictions`,
-`/telemetry/drone/:id`). El resto de pestañas sigue usando datos de ejemplo
-en `frontend/src/data/mock.js`.
+`/telemetry/drone/:id`). La pestaña `Operaciones`, pensada para la
+demostración en stand, usa además:
+
+- `POST /missions` y `PUT /missions/:id/finish` (flujo A: ciclo de misión).
+- `POST /maintenance`, `GET /maintenance` y `PUT /maintenance/:id/finish`
+  (flujo C: mantenimiento predictivo).
+- `POST /demo/reset` para borrar solo los registros `[DEMO]` y restaurar el
+  estado inicial entre visitantes.
+
+El resto de pestañas sigue usando datos de ejemplo en
+`frontend/src/data/mock.js`.
 
 El backend arranca aunque PostgreSQL, MongoDB y MQTT no estén disponibles:
 `/health`, `/`, `/api-docs` y la validación de JWT funcionan sin ellos.

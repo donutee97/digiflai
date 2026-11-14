@@ -493,6 +493,23 @@ const options = {
                     }
                 },
 
+                /* ---------------- Demostración ---------------- */
+
+                DemoResetResponse: {
+                    type: "object",
+                    properties: {
+                        success: { type: "boolean", example: true },
+                        data: {
+                            type: "object",
+                            properties: {
+                                deletedMissions: { type: "integer", example: 1 },
+                                deletedMaintenances: { type: "integer", example: 1 },
+                                restoredDrones: { type: "integer", example: 6 }
+                            }
+                        }
+                    }
+                },
+
                 /* ---------------- Comunes ---------------- */
 
                 MessageResponse: {
@@ -534,7 +551,8 @@ const options = {
             { name: "Dashboard", description: "Indicadores del panel general" },
             { name: "Maintenance", description: "Registro de mantenimientos" },
             { name: "Predictions", description: "Predicciones de fallo (IA)" },
-            { name: "Reports", description: "Reportes PDF / Excel" }
+            { name: "Reports", description: "Reportes PDF / Excel" },
+            { name: "Demo", description: "Reinicio de la demostración para el stand" }
         ]
     },
     apis: ["./src/routes/*.js"]

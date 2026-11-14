@@ -37,6 +37,12 @@ Las vistas `Panel general` (`src/views/TabDashboard.jsx`) y `Flota UAV`
 - `src/api/mappers.js` traduce los enums de PostgreSQL al formato visual.
 - `src/hooks/useApiData.js` maneja carga, error y cancelación al desmontar.
 
+La vista `Operaciones` (`src/views/TabOperaciones.jsx`) es la demostración
+para el stand: crea y finaliza una misión (flujo A), programa y finaliza un
+mantenimiento a partir de una predicción de la IA (flujo C) y permite
+reiniciar la demo con `POST /demo/reset`. Los registros que crea llevan el
+prefijo `[DEMO]` para poder borrarlos sin tocar los datos sembrados.
+
 Mientras no exista pantalla de login, `client.js` inicia sesión
 automáticamente con `VITE_DEMO_EMAIL` / `VITE_DEMO_PASSWORD` y guarda el
 token en `localStorage`. Es temporal: al crear el formulario de login, llama
@@ -83,6 +89,9 @@ frontend/
 │   ├── data/mock.js                # datos de ejemplo (pestañas sin API)
 │   ├── hooks/                      # useApiData
 │   ├── views/                      # pestañas del panel
+│   │   ├── TabDashboard.jsx        # Panel general (API)
+│   │   ├── TabFlota.jsx            # Flota UAV (API)
+│   │   └── TabOperaciones.jsx      # flujos del stand + Reiniciar demo
 │   ├── App.jsx
 │   ├── main.jsx
 │   └── index.css

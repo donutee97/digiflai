@@ -7,6 +7,7 @@ import KPI from "./components/ui/KPI";
 import FleetRadar from "./components/charts/FleetRadar";
 import TabDashboard from "./views/TabDashboard";
 import TabFlota from "./views/TabFlota";
+import TabOperaciones from "./views/TabOperaciones";
 import {
   LayoutDashboard, Plane, Activity, AlertTriangle, Wrench, Brain,
   Shield, Battery, Gauge, MapPin, Clock, Cpu, Signal, Thermometer,
@@ -24,6 +25,7 @@ import {
 ------------------------------------------------------------------*/
 
 const NAV = [
+  { id: "operaciones", label: "Operaciones", icon: Sparkles },
   { id: "dashboard", label: "Panel general", icon: LayoutDashboard },
   { id: "flota", label: "Flota UAV", icon: Plane },
   { id: "telemetria", label: "Telemetría", icon: Activity },
@@ -256,6 +258,7 @@ export default function DigiflAiApp() {
 
   const content = useMemo(() => {
     switch (tab) {
+      case "operaciones": return <TabOperaciones />;
       case "dashboard": return <TabDashboard />;
       case "flota": return <TabFlota />;
       case "telemetria": return <TabTelemetria />;

@@ -576,6 +576,19 @@ const paths = {
     ------------------------------------------------------------ */
 
     "/api/maintenance": {
+        get: {
+            tags: ["Maintenance"],
+            summary: "Listar mantenimientos",
+            description:
+                "Devuelve los mantenimientos con su dron y su técnico, del más " +
+                "reciente al más antiguo.",
+            parameters: pageParams,
+            responses: {
+                200: jsonResponse("Lista de mantenimientos.", ref("MaintenanceListResponse")),
+                401: commonErrors[401],
+                500: commonErrors[500]
+            }
+        },
         post: {
             tags: ["Maintenance"],
             summary: "Registrar un mantenimiento",
@@ -722,6 +735,29 @@ const paths = {
                         }
                     }
                 },
+                401: commonErrors[401],
+                403: errorResponse("Requiere rol ADMIN o SUPERVISOR."),
+                500: commonErrors[500]
+            }
+        }
+    },
+
+    /* ------------------------------------------------------------
+       DEMOSTRACIÓN (solo ADMIN / SUPERVISOR)
+    ------------------------------------------------------------ */
+
+    "/api/demo/reset": {
+        post: {
+            tags: ["Demo"],
+            summary: "Reiniciar la demostración",
+            description:
+                "Borra las misiones y los mantenimientos creados desde la " +
+                "pestaña **Operaciones** (los que empiezan por `[DEMO]`) y " +
+                "devuelve los drones y las misiones sembradas a su estado " +
+                "inicial. Requiere rol **ADMIN** o SUPERVISOR. Es idempotente: " +
+                "se puede llamar varias veces sin efecto adicional.",
+            responses: {
+                200: jsonResponse("Demostración reiniciada.", ref("DemoResetResponse")),
                 401: commonErrors[401],
                 403: errorResponse("Requiere rol ADMIN o SUPERVISOR."),
                 500: commonErrors[500]

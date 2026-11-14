@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía de estudio y exposición — DigiflAi</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+* { box-sizing: border-box; }
+body {
+  font-family: "DejaVu Serif", Georgia, serif;
+  font-size: 10.5pt; line-height: 1.5; color: #1b1f24;
+  margin: 0; padding: 0;
+}
+.cover {
+  padding: 28mm 10mm 14mm 10mm; border-bottom: 3px solid #0e7490;
+  margin-bottom: 10mm;
+}
+.cover .kicker {
+  font-family: "DejaVu Sans", Arial, sans-serif; font-size: 9pt;
+  letter-spacing: 2px; text-transform: uppercase; color: #0e7490;
+}
+.cover h1 {
+  font-family: "DejaVu Sans", Arial, sans-serif; font-size: 26pt;
+  margin: 4mm 0 2mm 0; color: #0f172a;
+}
+.cover .sub { font-size: 12pt; color: #475569; margin: 0 0 8mm 0; }
+.cover .meta { font-size: 9.5pt; color: #64748b; }
+.cover p, .cover .sub, .cover .meta { text-align: left; }
+h1, h2, h3, h4 {
+  font-family: "DejaVu Sans", Arial, sans-serif; color: #0f172a;
+  line-height: 1.25;
+}
+h1 { font-size: 20pt; margin: 0 0 4mm 0; }
+h2 {
+  font-size: 14pt; margin: 9mm 0 3mm 0; padding-bottom: 1.5mm;
+  border-bottom: 1px solid #cbd5e1; page-break-after: avoid;
+}
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; text-align: justify; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin-bottom: 1.2mm; }
+strong { color: #0f172a; }
+code {
+  font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 9pt;
+  background: #f1f5f9; padding: 0.3mm 1mm; border-radius: 2px;
+  color: #0f4c5c;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 4mm;
+  border-radius: 3px; overflow-x: auto; margin: 0 0 4mm 0;
+  page-break-inside: avoid; line-height: 1.3;
+}
+pre code { background: none; color: inherit; font-size: 8.3pt; padding: 0; line-height: 1.3; }
+blockquote {
+  margin: 0 0 4mm 0; padding: 3mm 4mm; background: #ecfeff;
+  border-left: 3px solid #0891b2; color: #164e63;
+  page-break-inside: avoid;
+}
+blockquote p { margin: 0; }
+table {
+  width: 100%; border-collapse: collapse; margin: 0 0 4mm 0;
+  font-size: 9.2pt; page-break-inside: avoid;
+}
+th, td {
+  border: 1px solid #cbd5e1; padding: 2mm 2.5mm; text-align: left;
+  vertical-align: top;
+}
+th { background: #e0f2fe; font-family: "DejaVu Sans", Arial, sans-serif; }
+tr:nth-child(even) td { background: #f8fafc; }
+hr { border: none; border-top: 1px solid #cbd5e1; margin: 6mm 0; }
+.toc {
+  margin: 0 0 8mm 0; padding: 4mm 5mm; background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.toc-title { font-size: 12pt; margin: 0 0 2mm 0; border: none; }
+.toc-item { margin: 0 0 1mm 0; font-size: 9.8pt; text-align: left; }
+.toc a { color: #0e7490; text-decoration: none; }
+a { color: #0e7490; }
+.note { font-size: 9pt; color: #475569; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="kicker">DigiflAi · Documento de estudio</div>
+  <h1>Guía de estudio y exposición</h1>
+  <p class="sub" style="text-align:left">Integración backend + frontend: qué está conectado, cómo funciona y cómo demostrarlo</p>
+  <p class="meta" style="text-align:left">
+    Proyecto: DigiflAi — monitoreo de flota de UAV<br>
+    Stack: React + Express + Prisma/PostgreSQL + MongoDB/Mongoose + MQTT<br>
+    Documento de apoyo para la sustentación
+  </p>
+</div>
+<p style="page-break-before:always;margin:0"></p>
+<nav class="toc"><h2 class="toc-title">Contenido</h2>
+<p class="toc-item" style="text-align:left"><a href="#s0">0. Resumen para decir en 30 segundos</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s1">1. Qué está conectado hoy (y qué no)</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s2">2. La idea general: cómo viaja un dato</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s3">3. Diccionario mínimo (con comparaciones que ya conoces)</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s6">4. Por qué usé un seed y no "datos reales"</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s12">5. El recorrido completo de una petición</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s16">6. Qué se agregó al backend para esta integración</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s19">7. Mapa de archivos (dónde mirar)</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s20">8. Cómo levantarlo (sin adivinar)</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s21">9. Guion de la demo (5 a 7 minutos)</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s32">10. Cómo demostrar que NO son datos quemados</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s33">11. Preguntas del jurado y respuestas cortas</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s34">12. Qué decir y qué no decir</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s35">13. Glosario de siglas</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s36">14. Chuleta de comandos</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s37">15. Checklist 10 minutos antes</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s38">16. Si te piden mostrar código, abre estos archivos en este orden</a></p>
+<p class="toc-item" style="text-align:left"><a href="#s39">17. Cierre: trabajo futuro</a></p>
+</nav>
+<h1 id="s0">Guía de estudio y exposición — DigiflAi</h1>
+<blockquote>Documento de apoyo para estudiar y presentar el avance de integración backend + frontend. Está escrito asumiendo que sabes Python, Django y PostgreSQL, pero todavía no JWT, CORS, MongoDB ni React avanzado. Todo lo que aparece aquí corresponde al proyecto tal como está hoy.</blockquote>
+<hr>
+<h2 id="s0">0. Resumen para decir en 30 segundos</h2>
+<blockquote>"DigiflAi es una plataforma para monitorear drones. El frontend está hecho en React y el backend en Node.js con Express. Lo que presento hoy es la integración de una parte del frontend con el backend: las vistas de <strong>Panel general</strong> y <strong>Flota UAV</strong> ya dejan de usar datos escritos en el código y consultan la API, que a su vez lee de PostgreSQL y MongoDB. La integración es parcial y funcional: dos vistas completas, el resto sigue con datos de ejemplo. El objetivo era demostrar el flujo completo de un dato, no terminar el producto."</blockquote>
+<p>Esa es la idea central. Todo lo demás es detalle para defenderla.</p>
+<hr>
+<h2 id="s1">1. Qué está conectado hoy (y qué no)</h2>
+<table><thead><tr><th>Vista del frontend</th><th>¿De dónde salen los datos?</th><th>Estado</th></tr></thead><tbody>
+<tr><td>Panel general (dashboard)</td><td>API → PostgreSQL + MongoDB</td><td><strong>Conectada</strong></td></tr>
+<tr><td>Flota UAV (tabla de drones)</td><td>API → PostgreSQL + MongoDB</td><td><strong>Conectada</strong></td></tr>
+<tr><td>Telemetría</td><td><code>src/data/mock.js</code></td><td>Pendiente</td></tr>
+<tr><td>Misiones</td><td><code>src/data/mock.js</code></td><td>Pendiente</td></tr>
+<tr><td>Alertas</td><td><code>src/data/mock.js</code></td><td>Pendiente</td></tr>
+<tr><td>Mantenimiento</td><td><code>src/data/mock.js</code></td><td>Pendiente</td></tr>
+<tr><td>Inteligencia artificial</td><td><code>src/data/mock.js</code></td><td>Pendiente</td></tr>
+<tr><td>Gemelo digital</td><td><code>src/data/mock.js</code></td><td>Pendiente</td></tr>
+</tbody></table>
+<p>Palabras importantes para la exposición:</p>
+<ul>
+<li><strong>"Datos de ejemplo" o "mock"</strong>: información escrita directamente en un archivo de JavaScript. No pasa por la base de datos.</li>
+<li><strong>"Datos persistidos"</strong>: información que vive en PostgreSQL o MongoDB y se pide por HTTP. Es lo que usan las dos vistas conectadas.</li>
+</ul>
+<p>Cantidad de datos que hay hoy en las bases:</p>
+<table><thead><tr><th>Dato</th><th>Cantidad</th><th>Base</th></tr></thead><tbody>
+<tr><td>Usuarios</td><td>5</td><td>PostgreSQL</td></tr>
+<tr><td>Drones</td><td>6</td><td>PostgreSQL</td></tr>
+<tr><td>Misiones</td><td>4</td><td>PostgreSQL</td></tr>
+<tr><td>Alertas</td><td>4</td><td>PostgreSQL</td></tr>
+<tr><td>Mantenimientos</td><td>3</td><td>PostgreSQL</td></tr>
+<tr><td>Predicciones de IA</td><td>4</td><td>PostgreSQL</td></tr>
+<tr><td>Lecturas de telemetría</td><td>30</td><td>MongoDB</td></tr>
+</tbody></table>
+<hr>
+<h2 id="s2">2. La idea general: cómo viaja un dato</h2>
+<pre><code>   NAVEGADOR (React)                         SERVIDOR (Node.js / Express)
+   ┌──────────────────┐   HTTP + JSON       ┌────────────────────────────┐
+   │ TabDashboard.jsx │ ──────────────────&gt; │ Rutas  /api/dashboard      │
+   │ TabFlota.jsx     │   + token JWT       │   ↓                        │
+   │                  │ &lt;────────────────── │ Controlador                │
+   └──────────────────┘                     │   ↓                        │
+            ▲                               │ Servicio (reglas)          │
+            │                               │   ↓                        │
+            │                               │ Repositorio (consultas)    │
+            │                               │   ↓                        │
+            │                               │ Prisma  ──&gt; PostgreSQL     │
+            │                               │ Mongoose ──&gt; MongoDB       │
+            │                               └────────────────────────────┘
+            │
+       MQTT (EMQX) &lt;── drones / sensores</code></pre>
+<p>La misma idea que en Django:</p>
+<table><thead><tr><th>Django</th><th>Este proyecto</th></tr></thead><tbody>
+<tr><td><code>urls.py</code></td><td><code>src/routes/*.routes.js</code></td></tr>
+<tr><td><code>views.py</code></td><td><code>src/controllers/*.controller.js</code></td></tr>
+<tr><td>Lógica en servicios</td><td><code>src/services/*.service.js</code></td></tr>
+<tr><td>ORM de Django</td><td>Prisma</td></tr>
+<tr><td><code>models.py</code></td><td><code>prisma/schema.prisma</code></td></tr>
+<tr><td>Migraciones</td><td><code>prisma/migrations/</code></td></tr>
+<tr><td><code>forms.py</code> / serializers</td><td><code>src/validators/*.validator.js</code></td></tr>
+<tr><td><code>manage.py loaddata</code> (fixtures)</td><td><code>prisma/seed-demo.js</code></td></tr>
+<tr><td>Middleware de sesión</td><td><code>src/middleware/auth.middleware.js</code></td></tr>
+</tbody></table>
+<p>Si entiendes esa tabla, ya entiendes la arquitectura. El resto son nombres.</p>
+<hr>
+<h2 id="s3">3. Diccionario mínimo (con comparaciones que ya conoces)</h2>
+<h3 id="s4">Backend</h3>
+<ul>
+<li><strong>Node.js</strong>: entorno que ejecuta JavaScript fuera del navegador. Es el "Python" de este proyecto.</li>
+<li><strong>Express</strong>: framework web para Node. Es el equivalente a Django, pero minimalista: tú decides qué middleware y qué rutas existen.</li>
+<li><strong>Ruta (route)</strong>: una URL asociada a una función. Ejemplo: <code>GET /api/drones</code>.</li>
+<li><strong>Controlador (controller)</strong>: recibe la petición HTTP, llama al servicio y responde JSON. Es como una vista de Django.</li>
+<li><strong>Servicio (service)</strong>: contiene reglas de negocio ("si el código del dron ya existe, lanza error"). Es código Python normal, sin HTTP.</li>
+<li><strong>Repositorio (repository)</strong>: solo habla con la base de datos. Separarlo permite cambiar de ORM sin tocar las reglas.</li>
+<li><strong>Prisma</strong>: el ORM. Tú escribes <code>prisma.drone.findMany()</code> y Prisma genera el SQL. Es el equivalente al ORM de Django.</li>
+<li><strong>PostgreSQL</strong>: base de datos relacional. Tablas, columnas, claves foráneas, enums. Igual que la que ya usas.</li>
+<li><strong>MongoDB</strong>: base de datos de <strong>documentos</strong>. Guarda objetos JSON completos en lugar de filas. Se usa aquí para telemetría porque llegan muchas lecturas por segundo y no todas tienen los mismos campos.</li>
+<li><strong>Mongoose</strong>: el "ORM" de MongoDB en Node. Define la forma del documento.</li>
+<li><strong>MQTT</strong>: protocolo de mensajería ligero para dispositivos. Los drones publican lecturas en un tema (topic) y el backend las recibe. Es como un cartero: el dron deja el mensaje en un buzón y el backend lo recoge.</li>
+<li><strong>EMQX</strong>: el servidor (broker) MQTT. Está en Docker, puerto 1883.</li>
+<li><strong>JWT</strong>: un token firmado. Al iniciar sesión, el backend entrega una cadena que el frontend guarda y envía en cada petición. El backend verifica la firma sin consultar la base de datos. Analogía: la manilla de un evento; con ella circulas, y el personal verifica que no sea falsa.</li>
+<li><strong>CORS</strong>: regla de los navegadores. Si tu página está en <code>localhost:5173</code> y llama a <code>localhost:4000</code>, el navegador pregunta al backend si ese origen está permitido. El backend responde con <code>Access-Control-Allow-Origin</code>. Sin eso, el navegador bloquea la lectura.</li>
+<li><strong>Joi</strong>: librería de validación. Revisa que el cuerpo de la petición tenga los campos correctos antes de tocar la base de datos. Es como <code>forms.py</code> de Django, pero para JSON.</li>
+<li><strong>Seed</strong>: script que carga datos iniciales o de demostración. Equivale a un fixture de Django. <strong>No es la base de datos</strong>: es el cargador.</li>
+<li><strong>Migración</strong>: archivo SQL versionado que crea o modifica tablas. Igual que las migraciones de Django.</li>
+</ul>
+<h3 id="s5">Frontend</h3>
+<ul>
+<li><strong>React</strong>: librería para construir interfaces con componentes (funciones que devuelven HTML). Piensa en "templates que se actualizan solos".</li>
+<li><strong>Componente</strong>: una función que devuelve interfaz. <code>TabFlota</code> es uno.</li>
+<li><strong>Hook</strong>: función especial de React que añade comportamiento. <code>useState</code> guarda valores; <code>useEffect</code> ejecuta código cuando el componente aparece.</li>
+<li><strong><code>fetch</code></strong>: función del navegador para hacer peticiones HTTP. Es el <code>requests</code> de JavaScript.</li>
+<li><strong><code>localStorage</code></strong>: almacenamiento pequeño del navegador. Aquí se guarda el token (<code>digiflai_token</code>).</li>
+<li><strong>Mapper</strong>: función que traduce la respuesta de la API al formato visual. Ejemplo: <code>AVAILABLE</code> (base de datos) → <code>OPERATIVO</code> (pantalla).</li>
+<li><strong>Vite</strong>: herramienta que compila React. Equivalente a <code>collectstatic</code> + servidor de desarrollo, pero moderno.</li>
+<li><strong>Nginx</strong>: servidor web que entrega el frontend ya compilado en Docker.</li>
+</ul>
+<hr>
+<h2 id="s6">4. Por qué usé un seed y no "datos reales"</h2>
+<p>Esta es la duda más importante, y la respuesta corta es:</p>
+<blockquote><strong>Los datos sí están en las bases de datos. El seed fue solo la herramienta para meterlos ahí de forma ordenada y repetible.</strong></blockquote>
+<p>Comparación con Django:</p>
+<pre><code class="lang-python"># Django
+python manage.py loaddata demo.json</code></pre>
+<pre><code class="lang-bash"># Este proyecto
+cd backend
+npm run seed:demo</code></pre>
+<p>Ambos hacen lo mismo: leer una definición de datos y escribirla en la base. La diferencia es que aquí el "fixture" es un script de JavaScript.</p>
+<h3 id="s7">Qué hace <code>seed-demo.js</code></h3>
+<ol>
+<li>Se conecta a PostgreSQL y MongoDB con las credenciales del <code>.env</code>.</li>
+<li>Crea roles y usuarios (con contraseña encriptada con bcrypt).</li>
+<li>Borra drones, misiones, alertas, mantenimientos y predicciones previos.</li>
+<li>Inserta los 6 drones, 4 misiones, 4 alertas, 3 mantenimientos y 4 predicciones.</li>
+<li>Borra la telemetría anterior en MongoDB e inserta 30 lecturas.</li>
+<li>Imprime un resumen con las cantidades.</li>
+</ol>
+<h3 id="s8">Qué NO hace</h3>
+<ul>
+<li><strong>No</strong> es leído por el frontend.</li>
+<li><strong>No</strong> se ejecuta cada vez que abres la página.</li>
+<li><strong>No</strong> reemplaza a la base de datos.</li>
+<li><strong>No</strong> es "información quemada" en el frontend.</li>
+</ul>
+<p>El frontend hace <code>fetch("http://localhost:4000/api/drones")</code>; el backend consulta PostgreSQL con Prisma; PostgreSQL devuelve las filas; el backend responde JSON. El archivo <code>seed-demo.js</code> no participa en ese recorrido.</p>
+<h3 id="s9">¿Por qué no insertar a mano en pgAdmin?</h3>
+<p>Podrías, pero tendrías que crear 6 drones, 4 misiones, 4 alertas, 3 mantenimientos y 4 predicciones respetando claves foráneas y enums. El seed hace eso en un comando y deja el mismo resultado cada vez. Para una exposición eso es valioso: si algo se daña, lo restauras en segundos.</p>
+<h3 id="s10">¿Y entonces qué es "dato real"?</h3>
+<p>En software hay dos sentidos:</p>
+<ul>
+<li><strong>Dato persistido</strong>: vive en la base de datos (lo que tenemos).</li>
+<li><strong>Dato de producción</strong>: lo generan usuarios reales en un sistema en uso.</li>
+</ul>
+<p>Lo que cargamos son <strong>datos de demostración persistidos</strong>. Para el jurado, la frase correcta es:</p>
+<blockquote>"Los datos están almacenados en PostgreSQL y MongoDB. Los cargamos con un script de inicialización para poder demostrar el sistema con información coherente."</blockquote>
+<p>Evita decir "datos reales" sin aclarar, porque puede interpretarse como "datos de producción". Di <strong>"datos persistidos en las bases"</strong>.</p>
+<h3 id="s11">Advertencia práctica</h3>
+<p>Cada vez que ejecutes <code>npm run seed:demo</code>:</p>
+<ul>
+<li>Se borran los drones y todo lo que depende de ellos.</li>
+<li>Se borra toda la telemetría de MongoDB.</li>
+<li>Los usuarios se conservan (se actualizan, no se duplican).</li>
+<li><strong>Los IDs numéricos de los drones cambian.</strong> El frontend no los usa: busca por <code>code</code> (<code>SD-0002</code>). Tenlo en cuenta solo si haces pruebas con MQTT usando <code>droneId</code>.</li>
+</ul>
+<hr>
+<h2 id="s12">5. El recorrido completo de una petición</h2>
+<p>Ejemplo real: la tabla de Flota pide los drones.</p>
+<h3 id="s13">Lado backend</h3>
+<ol>
+<li><strong><code>src/app.js</code></strong> monta las rutas: <code>app.use("/api/drones", droneRoutes)</code>.</li>
+<li><strong><code>src/routes/drone.routes.js</code></strong> define: <code>router.get("/", auth, controller.findAll)</code>. - <code>auth</code> es un middleware: revisa el header <code>Authorization: Bearer &lt;token&gt;</code>, valida la firma del JWT y deja los datos del usuario en <code>req.user</code>.</li>
+<li><strong><code>src/controllers/drone.controller.js</code></strong> lee <code>req.query</code> (por ejemplo <code>?limit=50</code>), llama al servicio y responde: <code>{ success: true, data: [...] }</code>.</li>
+<li><strong><code>src/services/drone.service.js</code></strong> aplica reglas y delega en el repositorio.</li>
+<li><strong><code>src/repositories/drone.repository.js</code></strong> ejecuta: <code>prisma.drone.findMany({ include: { operator: true } })</code>.</li>
+<li><strong>Prisma</strong> genera el SQL y lo envía a <strong>PostgreSQL</strong>.</li>
+<li>PostgreSQL devuelve filas. Prisma las convierte en objetos JavaScript.</li>
+<li>Express serializa a JSON y responde HTTP 200.</li>
+</ol>
+<h3 id="s14">Lado frontend</h3>
+<ol>
+<li><strong><code>src/views/TabFlota.jsx</code></strong> llama a <code>useApiData(() =&gt; api.getDrones(50), [])</code>.</li>
+<li><strong><code>src/hooks/useApiData.js</code></strong> ejecuta la función al montar el componente y guarda tres estados: <code>data</code>, <code>loading</code>, <code>error</code>.</li>
+<li><strong><code>src/api/client.js</code></strong>: - busca el token en <code>localStorage</code>; - si no existe, hace login automático con el usuario demo; - envía <code>Authorization: Bearer &lt;token&gt;</code>; - si recibe 401, borra el token, se loguea otra vez y reintenta una vez; - devuelve <code>body.data</code>.</li>
+<li><strong><code>src/api/mappers.js</code></strong> traduce los datos: - <code>AVAILABLE</code> → <code>OPERATIVO</code> - <code>IN_MISSION</code> → <code>EN_MISION</code> - <code>MAINTENANCE</code> → <code>MANTENIMIENTO</code> - <code>OFFLINE</code> → <code>FUERA_SERVICIO</code> - nombre y apellido del operador → un solo texto - <code>createdAt</code> → hora <code>HH:MM:SS</code></li>
+<li><strong><code>TabFlota.jsx</code></strong> recorre el arreglo y pinta las filas de la tabla.</li>
+<li>Mientras llega la respuesta muestra <strong>"Cargando flota desde la base de datos…"</strong>. Si falla, muestra <strong>"Error al consultar la API: …"</strong>.</li>
+</ol>
+<h3 id="s15">¿Por qué hay mappers?</h3>
+<p>Porque los enums de PostgreSQL están en inglés (<code>AVAILABLE</code>) y la interfaz está en español (<code>OPERATIVO</code>). En vez de llenar el JSX de <code>if</code>, se traduce en un solo archivo.</p>
+<hr>
+<h2 id="s16">6. Qué se agregó al backend para esta integración</h2>
+<p>El dashboard y la flota necesitaban predicciones de IA, pero <strong>no existía tabla para guardarlas</strong>. Se agregó:</p>
+<table><thead><tr><th>Capa</th><th>Archivo</th></tr></thead><tbody>
+<tr><td>Modelo</td><td><code>backend/prisma/schema.prisma</code> (modelo <code>Prediction</code>)</td></tr>
+<tr><td>Migración</td><td><code>backend/prisma/migrations/20261113171037_add_prediction/</code></td></tr>
+<tr><td>Repositorio</td><td><code>backend/src/repositories/prediction.repository.js</code></td></tr>
+<tr><td>Servicio</td><td><code>backend/src/services/prediction.service.js</code></td></tr>
+<tr><td>Controlador</td><td><code>backend/src/controllers/prediction.controller.js</code></td></tr>
+<tr><td>Rutas</td><td><code>backend/src/routes/prediction.routes.js</code></td></tr>
+<tr><td>Montaje</td><td><code>backend/src/app.js</code> → <code>/api/predictions</code></td></tr>
+</tbody></table>
+<p>Endpoints nuevos:</p>
+<ul>
+<li><code>GET /api/predictions</code></li>
+<li><code>GET /api/predictions/drone/:droneId</code></li>
+</ul>
+<h3 id="s17">Endpoints agregados para la demostración del stand</h3>
+<p>La pestaña <strong>Operaciones</strong> necesita listar mantenimientos y reiniciar la demostración sin ejecutar <code>npm run seed:demo</code> en medio de la feria:</p>
+<table><thead><tr><th>Capa</th><th>Archivo</th></tr></thead><tbody>
+<tr><td>Reinicio</td><td><code>backend/src/services/demo.service.js</code></td></tr>
+<tr><td>Controlador</td><td><code>backend/src/controllers/demo.controller.js</code></td></tr>
+<tr><td>Rutas</td><td><code>backend/src/routes/demo.routes.js</code></td></tr>
+<tr><td>Montaje</td><td><code>backend/src/app.js</code> → <code>/api/demo</code></td></tr>
+<tr><td>Listado</td><td><code>GET /api/maintenance</code> (repositorio y servicio ya existían)</td></tr>
+</tbody></table>
+<ul>
+<li><code>GET /api/maintenance</code> — lista los mantenimientos con dron y técnico.</li>
+<li><code>POST /api/demo/reset</code> — borra solo los registros <code>[DEMO]</code> y restaura los estados iniciales de drones y misiones. Requiere rol ADMIN.</li>
+</ul>
+<p>También se hizo configurable el límite de peticiones para que varios visitantes puedan usar el stand sin recibir <code>429</code>:</p>
+<table><thead><tr><th>Variable</th><th>Valor por defecto</th><th>Uso</th></tr></thead><tbody>
+<tr><td><code>RATE_LIMIT_MAX</code></td><td>100</td><td>peticiones a <code>/api/</code> cada 15 min</td></tr>
+<tr><td><code>AUTH_RATE_LIMIT_MAX</code></td><td>10</td><td>intentos de login cada 15 min</td></tr>
+</tbody></table>
+<p>En <code>.env</code> quedaron en 1000 y 200 para la jornada.</p>
+<p>También se agregó el campo <code>vibration</code> al modelo de telemetría de Mongo, porque el mock mostraba vibración y no se estaba guardando.</p>
+<h3 id="s18">Tres errores que se corrigieron en el camino</h3>
+<p>Sirven para mostrar que hubo depuración real:</p>
+<ol>
+<li><strong>Roles</strong>: el middleware recibía un arreglo y lo comparaba como texto. Se corrigió con <code>roles.flat()</code>.</li>
+<li><strong>Contraseñas expuestas</strong>: <code>GET /api/users</code> devolvía el hash de la contraseña. Ahora se elimina antes de responder.</li>
+<li><strong>Telemetría paginada</strong>: el controlador pasaba mal los parámetros (<code>req.query</code> completo en lugar de <code>filters, page, limit</code>).</li>
+</ol>
+<hr>
+<h2 id="s19">7. Mapa de archivos (dónde mirar)</h2>
+<pre><code>backend/
+├── prisma/
+│   ├── schema.prisma            # tablas y enums (PostgreSQL)
+│   ├── migrations/              # historial SQL
+│   └── seed-demo.js             # cargador de datos de demostración
+├── src/
+│   ├── app.js                   # monta rutas y middlewares
+│   ├── server.js                # arranca HTTP, WebSocket y MQTT
+│   ├── config/                  # prisma, mongo, swagger, env
+│   │   └── swagger.paths.js     # endpoints documentados en Swagger
+│   ├── routes/                  # URLs
+│   ├── controllers/             # reciben HTTP
+│   ├── services/                # reglas
+│   ├── repositories/            # consultas a la base
+│   ├── middleware/              # auth (JWT), roles, errores
+│   ├── validators/              # Joi
+│   ├── models/telemetry.model.js# esquema Mongoose
+│   ├── mqtt/mqtt.client.js      # recibe lecturas de los drones
+│   └── sockets/                 # Socket.IO (tiempo real)
+└── .env                         # credenciales locales (no se sube a Git)
+
+frontend/
+├── src/
+│   ├── api/client.js            # peticiones + token
+│   ├── api/mappers.js           # traducción de datos
+│   ├── hooks/useApiData.js      # carga, error, cancelación
+│   ├── views/TabDashboard.jsx   # Panel general (conectado)
+│   ├── views/TabFlota.jsx       # Flota UAV (conectado)
+│   ├── views/TabOperaciones.jsx # Flujos A y C + Reiniciar demo (stand)
+│   ├── components/              # ui (badges, KPI, paneles), charts
+│   ├── data/mock.js             # datos de ejemplo de las demás vistas
+│   └── App.jsx                  # menú y cambio de pestañas
+├── Dockerfile                   # build + Nginx
+└── nginx.conf</code></pre>
+<hr>
+<h2 id="s20">8. Cómo levantarlo (sin adivinar)</h2>
+<p>Requisitos: PostgreSQL local en <code>localhost:5432</code>, MongoDB y EMQX en Docker.</p>
+<pre><code class="lang-bash"># 1. Infraestructura (MongoDB + EMQX). NO arranques "api" ni "postgres".
+docker compose up -d mongodb mqtt
+
+# 2. Backend
+cd backend
+npm install            # solo la primera vez
+npx prisma generate    # solo si cambió el esquema
+npx prisma migrate deploy
+npm run seed           # roles del sistema
+npm run seed:demo      # datos de demostración (opcional pero recomendado)
+npm start              # API en http://localhost:4000
+
+# 3. Frontend (en otra terminal)
+cd frontend
+npm install            # solo la primera vez
+docker compose up -d --build --no-deps frontend
+# o, sin Docker: npm run dev</code></pre>
+<p>URLs:</p>
+<table><thead><tr><th>Servicio</th><th>URL</th></tr></thead><tbody>
+<tr><td>Frontend</td><td>http://localhost:5173</td></tr>
+<tr><td>API</td><td>http://localhost:4000</td></tr>
+<tr><td>Documentación Swagger</td><td>http://localhost:4000/api-docs</td></tr>
+<tr><td>Prisma Studio</td><td><code>cd backend &amp;&amp; npx prisma studio</code></td></tr>
+<tr><td>Consola EMQX</td><td>http://localhost:18083</td></tr>
+</tbody></table>
+<blockquote><strong>Importante:</strong> no uses <code>docker compose up -d</code> a secas. Ese comando también arranca un contenedor <code>api</code> y un PostgreSQL vacío en el puerto 5433, y el front terminaría hablando con el backend equivocado. Usa los servicios por nombre o <code>--no-deps</code>.</blockquote>
+<p>Verificación rápida con <code>curl</code>:</p>
+<pre><code class="lang-bash"># Login
+TOKEN=$(curl -s -X POST http://localhost:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@digiflai.com","password":"digiflai123"}' \
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['token'])")
+
+# Drones
+curl -s http://localhost:4000/api/drones?limit=20 \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool | head -30
+
+# Dashboard
+curl -s http://localhost:4000/api/dashboard \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool</code></pre>
+<p>Respuestas esperadas: <code>success: true</code> y <code>data</code> con los registros.</p>
+<p>Para detener todo:</p>
+<pre><code class="lang-bash">cd frontend &amp;&amp; docker compose stop frontend
+# Ctrl+C en la terminal del backend, o si lo dejaste en segundo plano:
+kill $(cat /tmp/opencode/backend.pid) 2&gt;/dev/null</code></pre>
+<hr>
+<h2 id="s21">9. Guion de la demo (5 a 7 minutos)</h2>
+<p>Ensaya esto dos o tres veces. Ten las pestañas abiertas de antemano.</p>
+<h3 id="s22">Modo stand (30–60 segundos)</h3>
+<p>La aplicación abre directamente en la pestaña <strong>Operaciones</strong> para que el visitante vea el flujo sin navegar. Para cada visitante:</p>
+<ol>
+<li><strong>Flujo A — ciclo de misión</strong>: se elige un dron disponible (o se deja el primero) y se pulsa <strong>Asignar misión</strong>. El dron pasa a EN MISIÓN y sube <em>Misiones activas</em>. Después, <strong>Finalizar misión</strong> lo devuelve a OPERATIVO.</li>
+<li><strong>Flujo C — mantenimiento predictivo</strong>: se muestra la predicción real <em>Motor delantero izq. — 94 % — CRÍTICO</em> y se pulsa <strong>Programar mantenimiento</strong>. El dron pasa a MANTENIMIENTO y aparece el registro. Después, <strong>Finalizar mantenimiento</strong> lo devuelve a servicio.</li>
+<li><strong>Reiniciar demo</strong>: borra solo los registros <code>[DEMO]</code>, restaura los estados iniciales de los drones y misiones y deja la pantalla lista para el siguiente visitante.</li>
+</ol>
+<p>Frase corta para decir en el stand:</p>
+<blockquote>"La IA detecta un fallo antes de que ocurra y el sistema ejecuta una acción real: envía el dron a mantenimiento. Todo lo que ve queda guardado en PostgreSQL; este botón lo limpia para el siguiente visitante."</blockquote>
+<p>En el stand <strong>no</strong> se ejecuta <code>npm run seed:demo</code> (tarda y cambia los ids) ni se abre el login: el cliente ya inicia sesión con el usuario demo.</p>
+<p>Diagrama corto para el póster:</p>
+<pre><code class="lang-text">FLUJO A — ciclo de misión
+[SD-0001 · OPERATIVO]
+        │  Asignar misión
+        ▼
+[SD-0001 · EN MISIÓN]  +  misión RUNNING
+        │  Finalizar misión
+        ▼
+[SD-0001 · OPERATIVO]  +  misión COMPLETADA
+
+FLUJO C — mantenimiento predictivo
+[IA · Motor delantero izq. · 94 % · CRÍTICO]
+        │  Programar mantenimiento
+        ▼
+[SD-0002 · MANTENIMIENTO]  +  registro con técnico
+        │  Finalizar mantenimiento
+        ▼
+[SD-0002 · OPERATIVO]
+
+[Reiniciar demo] → borra los registros [DEMO] y restaura el estado inicial</code></pre>
+<p>La app siempre usa el <strong>código</strong> del dron (<code>SD-0001</code>), no el id numérico, porque el id cambia cada vez que se ejecuta <code>npm run seed:demo</code>.</p>
+<h3 id="s23">Recorrido largo (5–7 minutos)</h3>
+<p>Si alguien pide la explicación completa, sigue estos pasos.</p>
+<h3 id="s24">Paso 1 — Abrir el frontend (30 s)</h3>
+<p>Abre http://localhost:5173. La app abre en <strong>Operaciones</strong>; puedes empezar por los dos flujos y después ir a las demás pestañas.</p>
+<p>Qué decir:</p>
+<blockquote>"Este es el panel. La navegación y el diseño ya estaban; lo que cambió es el origen de los datos en dos vistas."</blockquote>
+<h3 id="s25">Paso 2 — Panel general (1 min)</h3>
+<p>Señala los cuatro indicadores y el gráfico.</p>
+<blockquote>"Flota activa: 4 de 6. Misiones en curso: 2. Alertas críticas: 1. Riesgo alto: 2. Estos valores no están escritos en el código: los calcula el backend consultando PostgreSQL."</blockquote>
+<h3 id="s26">Paso 3 — La prueba técnica (1,5 min)</h3>
+<ol>
+<li><code>F12</code> → <strong>Network</strong>.</li>
+<li>Recarga.</li>
+<li>Señala la petición <code>dashboard</code>, <code>drones</code>, <code>alerts</code>, <code>missions</code>, <code>predictions</code>, <code>telemetry</code>.</li>
+<li>Haz clic en <code>drones</code> → <strong>Response</strong>.</li>
+</ol>
+<blockquote>"Aquí se ve el JSON que devuelve el backend. El navegador lo está pidiendo por HTTP; no hay datos quemados."</blockquote>
+<p>Si quieres impresionar: abre <strong>Application → Local Storage</strong> y muestra <code>digiflai_token</code>.</p>
+<blockquote>"El frontend guarda un token JWT y lo envía en el header Authorization de cada petición. El backend valida la firma antes de responder."</blockquote>
+<h3 id="s27">Paso 4 — Flota UAV (1 min)</h3>
+<p>Entra a Flota UAV.</p>
+<blockquote>"Los seis drones con su estado, batería, altitud, velocidad, señal y operador. La batería y la posición vienen de la telemetría almacenada en MongoDB; los datos del dron y del operador, de PostgreSQL."</blockquote>
+<h3 id="s28">Paso 5 — Demostrar que es la base de datos (1,5 min)</h3>
+<p>En otra terminal, marca como atendida la alerta crítica:</p>
+<pre><code class="lang-bash">TOKEN=$(curl -s -X POST http://localhost:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@digiflai.com","password":"digiflai123"}' \
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['token'])")
+
+curl -s -X PUT http://localhost:4000/api/alerts/1/attend \
+  -H "Authorization: Bearer $TOKEN"</code></pre>
+<p>Recarga el frontend.</p>
+<blockquote>"La alerta crítica bajó a cero porque el backend solo cuenta alertas no atendidas. El cambio quedó en PostgreSQL. Si vuelvo a ejecutar el seed, se restaura."</blockquote>
+<p>Este es el momento más fuerte de la demo. Practícalo.</p>
+<h3 id="s29">Paso 6 — Swagger (1 min)</h3>
+<p>Abre http://localhost:4000/api-docs.</p>
+<ol>
+<li>Entra a <strong>POST /api/auth/login</strong> → <em>Try it out</em> → <em>Execute</em>.</li>
+<li>Copia el valor de <code>token</code> de la respuesta.</li>
+<li>Pulsa <strong>Authorize</strong>, pega solo el token y confirma.</li>
+<li>Prueba <strong>GET /api/dashboard</strong> → <em>Try it out</em> → <em>Execute</em>.</li>
+</ol>
+<blockquote>"La API está documentada y se puede probar aquí sin escribir código. El login devuelve el token y el botón Authorize lo usa en todas las rutas."</blockquote>
+<h3 id="s30">Paso 7 — Cierre (30 s)</h3>
+<blockquote>"La integración cubre dos vistas completas. El resto sigue con datos de ejemplo por decisión de alcance. El siguiente paso es el login real, que hoy está simulado, y luego conectar las demás pestañas reutilizando el mismo cliente HTTP."</blockquote>
+<h3 id="s31">Plan B si algo falla</h3>
+<ul>
+<li><strong>No carga el frontend</strong>: verifica <code>docker compose ps</code> y que diga <code>healthy</code>.</li>
+<li><strong>Error de API en pantalla</strong>: el backend no está corriendo. <code>cd backend &amp;&amp; npm start</code>.</li>
+<li><strong>Pantalla vacía o error de red</strong>: revisa que el puerto 4000 responda: <code>curl http://localhost:4000/health</code>.</li>
+<li><strong>No hay datos</strong>: ejecuta <code>npm run seed:demo</code> y recarga.</li>
+<li><strong>Todo falla</strong>: ten capturas de pantalla de respaldo. Una demo con capturas sigue siendo una demo.</li>
+</ul>
+<hr>
+<h2 id="s32">10. Cómo demostrar que NO son datos quemados</h2>
+<p>Tres pruebas, de la más simple a la más contundente:</p>
+<ol>
+<li><strong>Network del navegador</strong>: hay peticiones HTTP reales y respuestas JSON.</li>
+<li><strong>Cambio en la base</strong>: marcar una alerta como atendida cambia el KPI al recargar.</li>
+<li><strong>Prisma Studio</strong>: <code>cd backend &amp;&amp; npx prisma studio</code> abre una interfaz web donde ves las filas reales. Si modificas una batería ahí y recargas el frontend, el cambio aparece.</li>
+</ol>
+<hr>
+<h2 id="s33">11. Preguntas del jurado y respuestas cortas</h2>
+<p><strong>¿Qué es un JWT?</strong></p>
+<blockquote>"Un token firmado que el servidor entrega al iniciar sesión. El frontend lo guarda y lo envía en cada petición; el backend verifica la firma. Sirve para no enviar usuario y contraseña en cada llamada."</blockquote>
+<p><strong>¿Por qué hay un login automático?</strong></p>
+<blockquote>"Porque todavía no existe pantalla de login. El cliente HTTP inicia sesión con un usuario de demostración y guarda el token. Es temporal y está aislado en un solo archivo; cuando exista el formulario, se reemplaza por una llamada normal."</blockquote>
+<p><strong>¿Dónde se guarda el token y es seguro?</strong></p>
+<blockquote>"En <code>localStorage</code>. Para una demo es suficiente. En producción se recomienda una cookie <code>httpOnly</code> para reducir el riesgo de robo por JavaScript."</blockquote>
+<p><strong>¿Por qué dos bases de datos?</strong></p>
+<blockquote>"PostgreSQL guarda datos estructurados y relacionados: usuarios, drones, misiones, alertas. MongoDB guarda telemetría: muchas lecturas por segundo, con campos variables. Separarlas evita que el volumen de telemetría afecte las consultas operativas."</blockquote>
+<p><strong>¿Por qué no todo en PostgreSQL?</strong></p>
+<blockquote>"Se podría, pero la telemetría crece muy rápido y no tiene un esquema fijo. MongoDB está pensado para ese patrón. Es una decisión de diseño, no una obligación."</blockquote>
+<p><strong>¿Qué es CORS?</strong></p>
+<blockquote>"Una regla del navegador. Si el frontend está en un puerto y la API en otro, el backend debe autorizar explícitamente ese origen. Sin esa autorización el navegador bloquea la respuesta."</blockquote>
+<p><strong>¿Qué pasa si la base de datos se cae?</strong></p>
+<blockquote>"El backend arranca igual: <code>/health</code> y la documentación responden. Las rutas que consultan datos devuelven error. El frontend muestra un mensaje de error en lugar de una pantalla vacía."</blockquote>
+<p><strong>¿Por qué el frontend pide <code>limit=50</code>?</strong></p>
+<blockquote>"La API pagina por defecto a 10 resultados. Para la tabla de flota se pide un límite mayor y así se ven todos los drones."</blockquote>
+<p><strong>¿Por qué los estados están en inglés en la base y en español en pantalla?</strong></p>
+<blockquote>"Los enums de PostgreSQL usan nombres técnicos (<code>AVAILABLE</code>). La interfaz usa español. Un archivo de mappers hace la traducción en un solo lugar."</blockquote>
+<p><strong>¿Qué falta para terminar?</strong></p>
+<blockquote>"Tres cosas: pantalla de login real, conectar las demás pestañas reutilizando el mismo cliente, y actualización en tiempo real con Socket.IO. El backend ya emite el evento <code>telemetry:update</code>; el frontend todavía no lo escucha."</blockquote>
+<p><strong>¿Cómo agregarías otra pestaña?</strong></p>
+<blockquote>"Tres pasos: agregar la función al cliente (<code>api.getX</code>), llamarla con <code>useApiData</code> en la vista, y mapear la respuesta si los nombres difieren. El patrón ya está resuelto en Flota."</blockquote>
+<p><strong>¿Qué rol tiene cada usuario?</strong></p>
+<blockquote>"ADMIN, OPERATOR, TECHNICIAN y RESEARCHER. Solo ADMIN puede gestionar usuarios y generar reportes. OPERATOR y TECHNICIAN pueden operar misiones y mantenimientos."</blockquote>
+<p><strong>¿Por qué el seed borra datos?</strong></p>
+<blockquote>"Para que la demo sea reproducible: cada ejecución deja exactamente los mismos registros. No debe usarse en producción."</blockquote>
+<p><strong>¿Usaste inteligencia artificial real?</strong></p>
+<blockquote>"No. Las predicciones son datos de demostración guardados en una tabla. La arquitectura ya tiene el espacio para que un modelo las genere y las inserte por la API."</blockquote>
+<p><strong>Si no sabes algo</strong></p>
+<blockquote>"Ese punto no lo implementé yo; puedo revisarlo y responderlo con el código en la mano."<br><br>Es mejor decir esto que inventar. Un jurado valora la honestidad técnica.</blockquote>
+<hr>
+<h2 id="s34">12. Qué decir y qué no decir</h2>
+<p><strong>Di:</strong></p>
+<ul>
+<li>"Integración parcial y funcional."</li>
+<li>"Dos vistas completas, el resto en datos de ejemplo."</li>
+<li>"Los datos están persistidos en PostgreSQL y MongoDB."</li>
+<li>"El frontend consume la API por HTTP con un token JWT."</li>
+<li>"El login es temporal porque aún no hay pantalla de login."</li>
+</ul>
+<p><strong>Evita:</strong></p>
+<ul>
+<li>"Está 100% terminado." (No lo está y no lo necesitas.)</li>
+<li>"Son datos reales." (Di "persistidos" o "de demostración".)</li>
+<li>"Se actualiza en vivo." (El frontend no escucha Socket.IO todavía.)</li>
+<li>"Todo el frontend ya está conectado." (Solo dos vistas.)</li>
+<li>"Usé MongoDB para…" si no puedes explicar para qué. Mejor: "la telemetría se guarda en MongoDB porque son muchas lecturas con esquema variable".</li>
+</ul>
+<hr>
+<h2 id="s35">13. Glosario de siglas</h2>
+<table><thead><tr><th>Sigla</th><th>Significado</th></tr></thead><tbody>
+<tr><td>API</td><td>Interfaz por la que dos programas se comunican</td></tr>
+<tr><td>REST</td><td>Estilo de API basado en URLs y verbos HTTP (GET, POST, PUT, DELETE)</td></tr>
+<tr><td>JSON</td><td>Formato de texto para intercambiar datos</td></tr>
+<tr><td>HTTP</td><td>Protocolo de comunicación web</td></tr>
+<tr><td>JWT</td><td>JSON Web Token: credencial firmada</td></tr>
+<tr><td>CORS</td><td>Cross-Origin Resource Sharing: permiso entre orígenes</td></tr>
+<tr><td>ORM</td><td>Object-Relational Mapping: traduce objetos a SQL</td></tr>
+<tr><td>CRUD</td><td>Crear, leer, actualizar, borrar</td></tr>
+<tr><td>MQTT</td><td>Protocolo de mensajería para dispositivos IoT</td></tr>
+<tr><td>UAV</td><td>Vehículo aéreo no tripulado (dron)</td></tr>
+<tr><td>KPI</td><td>Indicador clave de desempeño</td></tr>
+<tr><td>Seed</td><td>Script de carga de datos iniciales</td></tr>
+<tr><td>Mock</td><td>Dato simulado escrito en el código</td></tr>
+</tbody></table>
+<hr>
+<h2 id="s36">14. Chuleta de comandos</h2>
+<pre><code class="lang-bash"># Infraestructura
+docker compose up -d mongodb mqtt
+docker compose ps
+docker compose stop mongodb mqtt
+
+# Backend
+cd backend
+npm start
+npm run seed:demo
+npx prisma studio
+npx prisma migrate deploy
+npx prisma generate
+
+# Frontend
+cd frontend
+npm run dev
+docker compose up -d --build --no-deps frontend
+
+# Verificar API
+curl http://localhost:4000/health</code></pre>
+<p>Credenciales de demostración (todas con contraseña <code>digiflai123</code>):</p>
+<table><thead><tr><th>Correo</th><th>Rol</th></tr></thead><tbody>
+<tr><td>admin@digiflai.com</td><td>ADMIN</td></tr>
+<tr><td>h.moreno@digiflai.com</td><td>OPERATOR</td></tr>
+<tr><td>c.pinilla@digiflai.com</td><td>OPERATOR</td></tr>
+<tr><td>j.salas@digiflai.com</td><td>TECHNICIAN</td></tr>
+<tr><td>a.rua@digiflai.com</td><td>TECHNICIAN</td></tr>
+</tbody></table>
+<hr>
+<h2 id="s37">15. Checklist 10 minutos antes</h2>
+<ul>
+<li>☐ PostgreSQL local encendido.</li>
+<li>☐ <code>docker compose ps</code> muestra <code>mongodb</code>, <code>mqtt</code> y <code>frontend</code> activos.</li>
+<li>☐ Backend responde: <code>curl http://localhost:4000/health</code>.</li>
+<li>☐ Frontend abre en http://localhost:5173 y muestra datos.</li>
+<li>☐ La pestaña <strong>Operaciones</strong> abre por defecto y responde a los dos flujos.</li>
+<li>☐ <code>Reiniciar demo</code> deja SD-0001 y SD-0004 operativos, SD-0002 y SD-0005 en misión.</li>
+<li>☐ <code>.env</code> con <code>RATE_LIMIT_MAX=1000</code> y backend reiniciado (evita <code>429</code>).</li>
+<li>☐ <code>npm run seed:demo</code> ejecutado (para restaurar la alerta crítica).</li>
+<li>☐ Swagger abre en http://localhost:4000/api-docs.</li>
+<li>☐ Prisma Studio abierto en otra pestaña (opcional, pero impacta).</li>
+<li>☐ Terminal con el <code>curl</code> de "marcar alerta atendida" listo para pegar.</li>
+<li>☐ Capturas de pantalla de respaldo.</li>
+<li>☐ Documento de estudio abierto por si necesitas consultar.</li>
+</ul>
+<hr>
+<h2 id="s38">16. Si te piden mostrar código, abre estos archivos en este orden</h2>
+<ol>
+<li><strong><code>frontend/src/api/client.js</code></strong></li>
+</ol>
+<blockquote>"Aquí está el cliente HTTP. Añade el token JWT y maneja el 401."</blockquote>
+<ol>
+<li><strong><code>frontend/src/hooks/useApiData.js</code></strong></li>
+</ol>
+<blockquote>"Hook que ejecuta la petición al montar y expone carga y error."</blockquote>
+<ol>
+<li><strong><code>frontend/src/views/TabFlota.jsx</code></strong></li>
+</ol>
+<blockquote>"La vista ya no importa <code>mock.js</code>; llama a <code>api.getDrones()</code>."</blockquote>
+<ol>
+<li><strong><code>frontend/src/views/TabOperaciones.jsx</code></strong></li>
+</ol>
+<blockquote>"Aquí están los dos flujos del stand: crear y finalizar una misión, programar y finalizar un mantenimiento, y el botón Reiniciar demo."</blockquote>
+<ol>
+<li><strong><code>frontend/src/api/mappers.js</code></strong></li>
+</ol>
+<blockquote>"Traduce los enums de la base al español."</blockquote>
+<ol>
+<li><strong><code>backend/src/routes/drone.routes.js</code></strong></li>
+</ol>
+<blockquote>"Ruta protegida por el middleware de autenticación."</blockquote>
+<ol>
+<li><strong><code>backend/src/controllers/drone.controller.js</code></strong></li>
+</ol>
+<blockquote>"Recibe la petición y responde JSON."</blockquote>
+<ol>
+<li><strong><code>backend/src/repositories/drone.repository.js</code></strong></li>
+</ol>
+<blockquote>"Consulta con Prisma, equivalente al ORM de Django."</blockquote>
+<ol>
+<li><strong><code>backend/prisma/schema.prisma</code></strong></li>
+</ol>
+<blockquote>"Modelo de datos: tablas, relaciones y enums."</blockquote>
+<ol>
+<li><strong><code>backend/prisma/seed-demo.js</code></strong></li>
+</ol>
+<blockquote>"Cargador de datos de demostración, como un fixture de Django."</blockquote>
+<p>Si solo tienes un minuto, muestra el 1, el 3 y el 8. Cuentan la historia completa: frontend → API → base de datos.</p>
+<hr>
+<h2 id="s39">17. Cierre: trabajo futuro</h2>
+<p>Para la diapositiva o frase final:</p>
+<ol>
+<li><strong>Login real</strong> con formulario y manejo de sesión.</li>
+<li><strong>Conectar las pestañas restantes</strong> reutilizando <code>client.js</code>, <code>useApiData</code> y <code>mappers.js</code>.</li>
+<li><strong>Tiempo real</strong> con Socket.IO para que la telemetría se actualice sin recargar.</li>
+<li><strong>Pruebas automatizadas</strong> de los endpoints principales.</li>
+<li><strong>Despliegue</strong> con variables de entorno y HTTPS.</li>
+</ol>
+<p>Frase de cierre:</p>
+<blockquote>"El avance demuestra el flujo completo de un dato: del sensor a la base de datos y de la base de datos a la pantalla. Lo que falta es repetir ese patrón en las demás vistas y agregar el login real."</blockquote>
+</body>
+</html>

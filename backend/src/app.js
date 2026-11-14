@@ -34,7 +34,7 @@ app.use(morgan("combined", {
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: Number(process.env.RATE_LIMIT_MAX) || 100,
     message: {
         success: false,
         message: "Demasiadas solicitudes, intente más tarde."
@@ -47,7 +47,7 @@ app.use("/api/", limiter);
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: Number(process.env.AUTH_RATE_LIMIT_MAX) || 10,
     message: {
         success: false,
         message: "Demasiados intentos de inicio de sesión, intente más tarde."
@@ -101,6 +101,9 @@ app.use("/api/predictions", predictionRoutes);
 
 const maintenanceRoutes = require("./routes/maintenance.routes");
 app.use("/api/maintenance", maintenanceRoutes);
+
+const demoRoutes = require("./routes/demo.routes");
+app.use("/api/demo", demoRoutes);
 
 const reportRoutes = require("./routes/report.routes");
 app.use("/api/reports", reportRoutes);
